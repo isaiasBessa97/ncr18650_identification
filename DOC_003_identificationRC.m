@@ -28,12 +28,12 @@ voc_meas = [Vtp{1}(5,:) Vtp{2}(5,:) Vtp{3}(5,:) Vtp{4}(5,:)];
 soc_voc = [SOCp{1}(5,:) SOCp{2}(5,:) SOCp{3}(5,:) SOCp{4}(5,:)];
 %% R0 identification
 % Two types of R0: constant (R0_c) and polynomial (pR0)
-ordR0 = 9;
+ordR0 = 0;
 R0_c = mean(R0_meas);
 pR0 = polyfit(soc_R0,R0_meas,ordR0);
 pR02 = polyfit(voc_R0,R0_meas,ordR0);
 %% voc identification
-ordVoc = 9;
+ordVoc = 1;
 pVoc = polyfit(soc_voc,voc_meas,ordVoc);
 %% SOC simulated
 % soc_sim = 0.1:0.001:1;
