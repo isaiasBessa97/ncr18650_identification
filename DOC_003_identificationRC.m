@@ -33,7 +33,7 @@ R0_c = mean(R0_meas);
 pR0 = polyfit(soc_R0,R0_meas,ordR0);
 pR02 = polyfit(voc_R0,R0_meas,ordR0);
 %% voc identification
-ordVoc = 1;
+ordVoc = 6;
 pVoc = polyfit(soc_voc,voc_meas,ordVoc);
 %% SOC simulated
 % soc_sim = 0.1:0.001:1;
