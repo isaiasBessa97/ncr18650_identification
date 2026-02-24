@@ -1,5 +1,5 @@
 close all, clear all, clc
-meas = readtable("dataset-thermal\BID003\BID003_CDch200.0_04022026.txt");
+meas = readtable("dataset-thermal\BID001\BID001_RSDch_300102024.txt");
 time = meas.time;
 volt = meas.voltage;
 curr = meas.current;
