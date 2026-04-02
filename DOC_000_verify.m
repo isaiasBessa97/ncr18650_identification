@@ -1,5 +1,5 @@
 close all, clear all, clc
-meas = readtable("dataset-thermal\BID007\BID007_RSDch_20032026.txt");
+meas = readtable("dataset-thermal\BID008\BID008_RSDch_02042026.txt");
 time = meas.time;
 volt = meas.voltage;
 curr = meas.current;
@@ -15,6 +15,7 @@ figure()
 plot(time,volt)
 xlabel("Time (s)")
 ylabel("Voltage (V)")
+ylim([2.5 4.2])
 
 figure()
 plot(time,temp_s)
