@@ -1,6 +1,6 @@
 close all, clear all, clc
 %% Load data
-meas = load("dataset\BID001_RANDCh_29052024.xlsx");
+meas = load("dataset\BID002_RANDCh_30052024.xlsx");
 t = meas(:,1)';
 y = meas(:,2)';
 u = meas(:,3)';
