@@ -1,0 +1,133 @@
+close all; clear all; clc;
+%% Description
+% In the previous version we saw that teh voltage during the falls of
+% current pulse doesn't have time to rest so we decided to let 2 seconds
+% (occurences) before calculate dV because 
+%% 1. Configuration
+% Pulse detection threshold
+current_min_step = 0.5;
+
+% Battery specifications for SoC calculation
+Qn = 3.05;         % Nominal capacity in Ah (Adjust this for your cell)
+initial_soc = 100; % Starting SoC of the test (%)
+
+
+% Number of occurences (seconds) to wait after the current is cut to read the voltage
+% This allows the battery voltage to relax and fixes the sensor lag.
+fall_delay_steps = 2; 
+
+% Prompt user for the dynamic pulse test file
+disp('Select the pulse test file...');
+[file_name, path_name] = uigetfile({'*.txt;*.csv', 'Text/Data Files'; '*.*', 'All Files'}, 'Select the Pulse Test file');
+if isequal(file_name,0); error('Cancelled by user'); end
+file_path = fullfile(path_name, file_name);
+
+%% 2. Calculate Continuous SoC & Read Data
+disp('Calculating Continuous SoC...');
+% Call the external function (Make sure your get_soc.m has the 100* multiplier fix!)
+soc_full = get_soc(file_path, Qn, initial_soc);
+
+% We must read V and I here in the main script 
+% so we can use them for the synchronization and the Option B correction.
+data = readmatrix(file_path, 'Delimiter', ';', 'NumHeaderLines', 1);
+V = data(:, 2);
+I = data(:, 3);
+
+%% 3. Retrieve R0 using your UNMODIFIED get_r0 function
+disp('Extracting R0 from get_r0...');
+[r0_array, v_array, i_array] = get_r0(file_path, current_min_step);
+
+%% 4. Match SoC to R0 (Recreating the indices externally)
+dI = diff(I);
+dV = diff(V);
+raw_indices = find(abs(dI) >= current_min_step);
+
+% Apply the exact same filter as get_r0 
+r0_raw = abs(dV(raw_indices) ./ dI(raw_indices));
+valid_indices = raw_indices(r0_raw < 0.5);
+
+% Map the SoC exactly to the valid pulses
+soc_at_pulses = soc_full(valid_indices);
+
+% Safety check: Ensure arrays matched perfectly
+if length(soc_at_pulses) ~= length(r0_array)
+    error('Mismatch in array lengths. Data alignment failed.');
+end
+
+%% 5. Classify into Rise (a->b) and Fall (c->d)
+is_rise = abs(i_array) > 0.1; 
+
+% --- RISE Data (Pulse ON) ---
+% No correction needed for the rise, it is usually accurate immediately
+soc_rise = soc_at_pulses(is_rise);
+r0_rise  = r0_array(is_rise);
+
+% --- FALL Data (Pulse OFF) 
+soc_fall = soc_at_pulses(~is_rise);
+fall_indices = valid_indices(~is_rise);
+r0_fall_corrected = zeros(size(fall_indices));
+
+disp('Applying relaxation delay correction for Pulse OFF (Fall)...');
+for k = 1:length(fall_indices)
+    idx = fall_indices(k);
+    
+    % Target index: look X steps ahead, but don't exceed file length
+    target_idx = min(idx + fall_delay_steps, length(V));
+    
+    % Recalculate Delta V and Delta I with the delay
+    delta_V_delayed = V(target_idx) - V(idx);
+    delta_I_delayed = I(target_idx) - I(idx);
+    
+    % Calculate the corrected R0
+    if delta_I_delayed == 0
+        r0_fall_corrected(k) = NaN; % Prevent division by zero
+    else
+        r0_fall_corrected(k) = abs(delta_V_delayed / delta_I_delayed);
+    end
+end
+
+% Assign the newly corrected values to our plotting array
+r0_fall = r0_fall_corrected;
+
+%% 6. Export Results to Excel File
+disp('Preparing data for export...');
+[save_name, save_path] = uiputfile('*.xlsx', 'Save the Results as an Excel file');
+
+if ~isequal(save_name, 0)
+    full_save_path = fullfile(save_path, save_name);
+    
+    Table_Rise = table(soc_rise, r0_rise, 'VariableNames', {'SoC_Percentage', 'Internal_Resistance_R0_Ohms'});
+    Table_Fall = table(soc_fall, r0_fall, 'VariableNames', {'SoC_Percentage', 'Internal_Resistance_R0_Ohms'});
+    
+    writetable(Table_Rise, full_save_path, 'Sheet', 'Pulse_ON_Rise');
+    writetable(Table_Fall, full_save_path, 'Sheet', 'Pulse_OFF_Fall');
+    
+    fprintf('\nSUCCESS! Data saved to: %s\n', save_name);
+else
+    disp('Export cancelled by the user.');
+end
+
+%% 7. Plotting the Results
+figure('Color', 'w'); hold on; grid on;
+
+min_r0_rise = min(r0_rise);
+min_r0_fall = min(r0_fall);
+% Plot Rise (Points bleus)
+plot(soc_rise, r0_rise, 'ob', 'LineWidth', 1.5, 'MarkerSize', 6, ...
+    'MarkerFaceColor', 'b', 'DisplayName', sprintf('Pulse ON (Rise: Immediate)| R0_min = %4f', min_r0_rise));
+
+% Plot Fall (Carrés rouges)
+plot(soc_fall, r0_fall, 'sr', 'LineWidth', 1.5, 'MarkerSize', 6, ...
+    'MarkerFaceColor', 'r', 'DisplayName', sprintf('Pulse OFF (Fall: %d sec delay)| R0_min = %4f', fall_delay_steps, min_r0_fall));
+
+% Formatting
+xlabel('State of Charge (SoC) [%]', 'FontWeight', 'bold');
+ylabel('Internal Resistance R_0 (\Omega)', 'FontWeight', 'bold');
+title('Internal Resistance vs SoC', 'FontSize', 14);
+legend('Location', 'best');
+
+% Reverse X-axis
+set(gca, 'XDir', 'reverse'); 
+
+hold off;
+disp('Done!');

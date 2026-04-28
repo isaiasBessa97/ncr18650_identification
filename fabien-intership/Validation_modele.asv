@@ -1,0 +1,113 @@
+close all; clear all; clc;
+
+%% 1. Configuration des paramètres de la cellule
+% Ces valeurs définissent les propriétés physiques de la cellule
+Qn_nominal = 3.05;      % Capacité nominale (Ah)
+initial_soc = 100;      % SoC initial pour un test démarrant à pleine charge (%)
+current_step = 0.5;     % Seuil pour détecter un saut de courant (A)
+
+%% 2. ÉTAPE 1 : Identification de l'OCV (Open Circuit Voltage)
+% Cette étape fusionne un test de charge et de décharge lente (0.05C) 
+% pour obtenir la courbe de tension de repos "pseudo-OCV".
+disp('--- ÉTAPE 1 : Modélisation de l''OCV ---');
+[f_ch, p_ch] = uigetfile('*.txt', 'Sélectionne le fichier de CHARGE (0.05C)');
+[f_dis, p_dis] = uigetfile('*.txt', 'Sélectionne le fichier de DÉCHARGE (0.05C)');
+
+if isequal(f_ch,0) || isequal(f_dis,0); error('Fichiers OCV manquants'); end
+
+% Appel de ta fonction get_ocv
+[soc_ocv, V_ocv_raw, ~] = get_ocv(fullfile(p_ch, f_ch), fullfile(p_dis, f_dis));
+
+% Calcul du polynôme OCV (Moindres Carrés)
+% L'article recommande un degré 9 pour capturer la chimie complexe.
+poly_degree = 9; 
+valid_idx = ~isnan(V_ocv_raw); % Filtre pour ignorer les parties ou on a pas de valeurs
+p_coeffs_ocv = polyfit(soc_ocv(valid_idx), V_ocv_raw(valid_idx), poly_degree);
+
+fprintf('Modèle OCV (Degré %d) calculé.\n', poly_degree);
+
+%% 3. ÉTAPE 2 : Extraction de R0 et des paramètres RC (R1, C1, R2, C2)
+% On utilise ici un dataset dynamique (type MPDch ou RDch).
+disp('--- ÉTAPE 2 : Extraction de R0 et des paramètres RC ---');
+[f_data, p_data] = uigetfile('*.txt', 'Sélectionne le dataset de test (ex: MPDch)');
+if isequal(f_data,0); error('Dataset manquant'); end
+file_path = fullfile(p_data, f_data);
+
+% A. Extraction de R0
+[r0_vals, ~, ~] = get_r0(file_path, current_step); %Value 1 and 2 are current and voltage we don't need it here
+R0_mean = mean(r0_vals); % Moyenne pour le modèle constant 
+
+% B. Extraction des paramètres RC
+% On utilise la version simplifiée sans le filtre 'min_current_fit'.
+[soc_rc, R1_vec, C1_vec, R2_vec, C2_vec] = get_rc_parameters(file_path, Qn_nominal, initial_soc, current_step);
+
+% Calcul des moyennes (Algorithme 1, Étape 9 de l'article) 
+R1_m = mean(R1_vec);
+C1_m = mean(C1_vec);
+R2_m = mean(R2_vec);
+C2_m = mean(C2_vec);
+
+%% 4. Synthèse et Affichage des résultats
+fprintf('\n====================================================\n');
+fprintf('PARAMÈTRES FINAUX POUR TON MODÈLE\n');
+fprintf('====================================================\n');
+fprintf('R0 (Résistance interne) : %.4f Ohm\n', R0_mean);
+fprintf('R1 (Polarisation rapide) : %.4f Ohm | C1 : %.1f F\n', R1_m, C1_m);
+fprintf('R2 (Polarisation lente)  : %.4f Ohm | C2 : %.1f F\n', R2_m, C2_m);
+fprintf('====================================================\n');
+
+% Graphique des paramètres RC vs SoC
+figure('Name', 'Évolution des paramètres identifiés');
+subplot(2,1,1); hold on; grid on;
+plot(soc_rc, R1_vec, 'o-b', 'DisplayName', 'R1 (Électrochimique)');
+plot(soc_rc, R2_vec, 's-r', 'DisplayName', 'R2 (Concentration)');
+ylabel('Résistance [\Omega]'); legend; set(gca, 'XDir', 'reverse');
+
+subplot(2,1,2); hold on; grid on;
+plot(soc_rc, C1_vec, 'o-g', 'DisplayName', 'C1');
+plot(soc_rc, C2_vec, 's-m', 'DisplayName', 'C2');
+ylabel('Capacité [F]'); xlabel('SoC [%]'); legend; set(gca, 'XDir', 'reverse');
+
+sgtitle(['Paramètres RC vs SoC - Fichier : ', f_data]);
+
+%% --- BLOC DE SIMULATION DU MODÈLE ---
+% On recharge les données brutes pour la comparaison
+data = readmatrix(file_path, 'Delimiter', ';', 'NumHeaderLines', 1);
+t_vec = data(:, 1); V_mes = data(:, 2); I_vec = data(:, 3);
+soc_sim = get_soc(file_path, Qn_nominal, initial_soc);
+
+% Préparation des variables
+N = length(I_vec);
+x1 = zeros(N, 1); x2 = zeros(N, 1); V_sim = zeros(N, 1);
+tau1 = R1_m * C1_m; tau2 = R2_m * C2_m;
+
+% Boucle de simulation (Logique de tes photos)
+for k = 2:N
+    dt = t_vec(k) - t_vec(k-1);
+    
+    % Mise à jour des tensions de polarisation (x1 et x2)
+    x1(k) = exp(-dt/tau1)*x1(k-1) + R1_m*(1 - exp(-dt/tau1))*I_vec(k-1);
+    x2(k) = exp(-dt/tau2)*x2(k-1) + R2_m*(1 - exp(-dt/tau2))*I_vec(k-1);
+    
+    % Calcul de la tension simulée : OCV - R0*I - x1 - x2
+    V_sim(k) = polyval(p_coeffs_ocv, soc_sim(k)) - R0_mean * I_vec(k) - x1(k) - x2(k);
+end
+%% --- GRAPHIQUE DE VALIDATION (COMPARAISON DES TENSIONS) ---
+figure('Color', 'w', 'Name', 'Validation : Mesure vs Simulation');
+
+% Subplot supérieur : Les deux courbes de tension
+subplot(2,1,1); hold on; grid on;
+plot(t_vec, V_mes, 'k', 'LineWidth', 1.5, 'DisplayName', 'Tension Mesurée');
+plot(t_vec, V_sim, '--r', 'LineWidth', 1.5, 'DisplayName', 'Tension Simulée');
+ylabel('Tension [V]', 'FontWeight', 'bold');
+title('Validation du Modèle : Comparaison des Tensions');
+legend('Location', 'best');
+
+% Subplot inférieur : L'erreur (V_mes - V_sim)
+subplot(2,1,2); hold on; grid on;
+error_vec = V_mes - V_sim;
+plot(t_vec, error_vec, 'b', 'DisplayName', 'Erreur (V_{mes} - V_{sim})');
+yline(0, '--k', 'HandleVisibility', 'off'); % Ligne du zéro
+ylabel('Erreur [V]', 'FontWeight', 'bold');
+xlabel('Temps [s]', 'FontWeight', 'bold');
+title(sprintf('Erreur de Prédiction (RMSE = %.4f V)', sqrt(mean(error_vec.^2, 'omitnan'))));
