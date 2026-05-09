@@ -8,11 +8,13 @@ load("DS_002_RCpar.mat")
 par = [R0_c R1_c R2_c C1_c C2_c];
 Qn = 3.08;
 %% Simulation
+% Dataset
 soc(1) = 1;
 for ii = 2:length(t)
     soc(ii) = soc(ii-1) - u(ii)/(3600*Qn);
 end
-x(:,1) = [0;0;soc(1)];
+% Model
+x(:,1) = [0;0;.8];
 phi(1) = pVoc*(x(3,1).^(length(pVoc)-1:-1:0))';
 ym(1) = [-1 -1 0]*x - R0_c*u(1) + phi(1);
 for ii = 2:length(t)

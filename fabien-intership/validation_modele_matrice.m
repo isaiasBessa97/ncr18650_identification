@@ -1,4 +1,4 @@
-% close all; clear all; clc;
+close all; clear all; clc;
 
 %% 1. Cell Parameter Configuration
 % These values define the physical properties of your Panasonic cell.
@@ -76,25 +76,43 @@ sgtitle(['RC Parameters vs SoC - File: ', f_data]);
 data = readmatrix(file_path, 'Delimiter', ';', 'NumHeaderLines', 1);
 t_vec = data(:, 1); V_mes = data(:, 2); I_vec = data(:, 3);
 soc_sim = get_soc(file_path, Qn_nominal, initial_soc);
+Ts = 1; %dt
+N = length(I_vec); %NB values
 
-% Variable preparation
-N = length(I_vec);
-x1 = zeros(N, 1); x2 = zeros(N, 1);x3 = 100*ones(N, 1) ;V_sim = zeros(N, 1);
-tau1 = R1_m * C1_m; tau2 = R2_m * C2_m;
+%% 2. Création des matrices du State-Space 
+% Matrice A (3x3) : Définit la dynamique interne (relaxation)
+A = [ (1 - Ts/(R1_m*C1_m)), 0,                          0 ;
+      0,                          (1 - Ts/(R2_m*C2_m)), 0 ;
+      0,                          0,                          1 ];
 
-% Simulation loop (Logic from your photos)
-for k = 2:N
-%     dt = t_vec(k) - t_vec(k-1);
-    dt = 1;
+
+% Matrice B (3x1) : Définit l'impact du courant sur les états
+B = [ Ts/C1_m ;
+      Ts/C2_m ;
+     -Ts/(3600*Qn_nominal) ]; % SoC descend pendant la décharge
+
+% Matrices de sortie 
+C_mat = [-1, -1, 0];
+D_mat = -R0_mean;
+
+%% 3. Boucle de Simulation
+% On utilise toujours une boucle car l'OCV est non-linéaire 
+x = zeros(3, N); 
+V_sim = zeros(N, 1);
+x(:, 1) = [0; 0; 1.0]; % Initialisation (batterie pleine)
+
+for k = 1:N
+    % 1. Calcul de l'OCV pour le SoC actuel
+    soc_percent = x(3, k) * 100; 
+    phi_k = polyval(p_coeffs_ocv, soc_percent);
+    % 2. Calcul de la tension de sortie : y = C*x + D*u + OCV
+    V_sim(k) = C_mat * x(:, k) + D_mat * I_vec(k) + phi_k;
     
-    % Update polarization voltages (x1 and x2)
-    x1(k) = exp(-dt/tau1)*x1(k-1) + R1_m*(1 - exp(-dt/tau1))*I_vec(k-1);
-    x2(k) = exp(-dt/tau2)*x2(k-1) + R2_m*(1 - exp(-dt/tau2))*I_vec(k-1);
-    x3(k) = x3(k-1) -(100*dt/(3600*Qn_nominal))*I_vec(k-1);
-    % Calculate simulated voltage: OCV - R0*I - x1 - x2
-    V_sim(k) = polyval(p_coeffs_ocv, x3(k)) - R0_mean * I_vec(k) - x1(k) - x2(k);
+    % 3. Mise à jour de la matrice d'état : x(k+1) = A*x(k) + B*u(k)
+    if k < N
+        x(:, k+1) = A * x(:, k) + B * I_vec(k);
+    end
 end
-
 %% --- VALIDATION GRAPH (VOLTAGE COMPARISON) ---
 figure('Color', 'w', 'Name', 'Validation: Measurement vs Simulation');
 
