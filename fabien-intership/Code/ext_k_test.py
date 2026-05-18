@@ -160,7 +160,10 @@ soc_valid = soc_ocv[valid_idx]
 V_valid = V_ocv_raw[valid_idx]
 
 # Création du polynôme (degré 1 pour que ce soit lineaire)
-p_coeffs_ocv = np.polyfit(soc_valid, V_valid, 1)
+p_coeffs_ocv = np.polyfit(soc_valid, V_valid, 9)
+
+#Calcul de la derivee des coefficients 
+dp_coeffs_ocv = np.polyder(p_coeffs_ocv)
 
 # Chargement du SoC réel
 soc_true = get_soc(file_test, Qn, initial_soc)
@@ -176,7 +179,7 @@ N = len(time)
 
 # --- 2. Initialisation RLS ---
 lmbda = 0.9999
-P = np.eye(5)
+P = 1*np.eye(5)
 theta = np.array([[0.1], [0.1], [0.01], [0.01], [0.01]]) # Vecteur colonne 5x1
 
 soc_estimated = np.zeros(N)
@@ -197,25 +200,23 @@ A = np.array([[0,0,0],[0,0,0],[0,0,0]])
 B = np.array([[0],[0],[b3]])
 C = np.array([[-1,-1,p_coeffs_ocv[0]]])
 D = np.array([[-0.1]]) # -R0
-P_KF = np.eye(3) * 10 # A VOIR COMMENT INITIALISER
+P_KF = np.eye(3) * 10 # Plus on augmente plus le gain sera fort au depart 
 wk = 0 # Process noise
-Q = np.diag([1e-4, 1e-4, 1e-6])  # Process noise covariance 
+Q = np.diag([1e-4, 1e-4, 1e-6])*1 # Process noise covariance 
 R_kf = np.array([[0.01]])*0.1 # Covariance of the measurement noise
 
+soc_estimated[0] = x_k[2, 0]
+soc_estimated[0] = max(0, min(100, soc_estimated[0]))
+        
+    # C. OCV Estimation
+ocv_k = np.polyval(p_coeffs_ocv, soc_estimated[0])
 # --- 3. Boucle Temps Réel (BMS) ---
 print('Starting Real-Time RLS with Coulomb Counting...')
 
 for k in range(N):
     u_k = I_meas[k]
     
-    # B. BMS SoC Estimation
-    if k > 0:
-        soc_estimated[k] = x_k[2, 0]
-        soc_estimated[k] = max(0, min(100, soc_estimated[k]))
-        
-    # C. OCV Estimation
     ocv_k = np.polyval(p_coeffs_ocv, soc_estimated[k])
-    
     # D. Pure dynamics
     y_rls = ocv_k - V_meas[k]
     
@@ -257,20 +258,34 @@ for k in range(N):
     B = np.array([[b1],[b2],[b3]])
     D = np.array([[-r0]])
     # C never change
-    # --- Utilisation KALMAN ---
+   # --- Utilisation EKF (Méthode Matricielle) ---
 
-    #PREDICTION
-    x_pred = A @ x_k + B * u_k + wk
+    # 1. PRÉDICTION 
+    x_pred = A @ x_k + B * u_k
     P_pred = A @ P_KF @ A.T + Q
-
-    #CORRECTION
-    # Tension prédite par le modèle 
-    y_pred_kf = (C @ x_pred + D * u_k).item() + p_coeffs_ocv[1] # beta, ordonnée à l'origine
     
 
-    innovation = V_meas[k] - y_pred_kf
+    docv_dsoc = np.polyval(dp_coeffs_ocv, soc_estimated[k])
     
-    # Gain de Kalman
+    # On met à jour C avec la nouvelle pente
+    C = np.array([[-1, -1, docv_dsoc]])
+    
+    # On calcule l'Ordonnée à l'origine de la tangente
+    #V_0 = ocv_k - (docv_dsoc *  soc_estimated[k])
+    
+    # --- PRÉDICTION DE LA TENSION ---
+
+    #V_0 et l'ordonnee a l'origine de la courbe car dans la matrice C on donne tous les autres coefficients qui vont etre multiplie par Xsoc
+    # Si on rajoute OCV a la fin ca revient a doubler les valeurs 
+
+    #y_pred_ekf = (C @ x_pred + D * u_k).item() + V_0
+    y_pred_ekf = -x_pred[0, 0] - x_pred[1, 0] + (D * u_k).item() + ocv_k
+
+    
+    # 3. CORRECTION
+    innovation = V_meas[k] - y_pred_ekf
+    
+    # Gain de Kalman (on garde bien la variable C)
     S = C @ P_pred @ C.T + R_kf
     L_kf = P_pred @ C.T @ np.linalg.inv(S)
     
@@ -280,8 +295,11 @@ for k in range(N):
     terme1 = I_mat - L_kf @ C
     P_KF = terme1 @ P_pred @ terme1.T + L_kf @ R_kf @ L_kf.T
     
-    #Sauvegarde de la tension
-    V_model[k] = y_pred_kf
+    # Sauvegarde de la tension
+    V_model[k] = y_pred_ekf
+
+    soc_estimated[k] = x_k[2, 0]
+    soc_estimated[k] = max(0, min(100, soc_estimated[k]))
     # G. Time shift (k devient k-1)
     y_past = np.array([y_rls, y_past[0]])
     u_past = np.array([u_k, u_past[0]])
