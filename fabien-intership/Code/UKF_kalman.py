@@ -301,7 +301,7 @@ for k in range(N):
     B = np.array([[b1],[b2],[b3]])
     D = np.array([[-r0]])
     # C never change
-   # --- Utilisation EKF (Méthode Matricielle) ---
+   # --- Utilisation UKF  ---
 
     # 1. PRÉDICTION 
     sigma_points_pred = np.zeros((3,7))
