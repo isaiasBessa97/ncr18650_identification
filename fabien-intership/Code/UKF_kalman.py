@@ -219,7 +219,7 @@ P = 1*np.eye(5)
 theta = np.array([[0.1], [0.1], [0.01], [0.01], [0.01]]) # Vecteur colonne 5x1
 
 soc_estimated = np.zeros(N)
-soc_estimated[0] = 70 # SOC initial du modèle
+soc_estimated[0] = 80 # SOC initial du modèle
 
 theta_history = np.zeros((N, 5))
 # R0_hist = np.zeros(N); R1_hist = np.zeros(N); C1_hist = np.zeros(N)
