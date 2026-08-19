@@ -145,34 +145,40 @@ def get_soc(file_path, Qn, initial_soc):
 
 
 
-def generate_cubature_points(x_k, P):
+def generate_sigma_points(x_k, P, kappa):
     """
-    Génère les 2N points de cubature (pas de point central).
+    Génère les 2N + 1 points sigma sous forme de vecteurs colonnes.
+    
+    Arguments:
+    x_k   -- Vecteur d'état actuel (DOIT être de forme (N, 1))
+    P     -- Matrice de covariance actuelle (forme (N, N))
+    kappa -- Paramètre d'étalement
     """
-    nx = x_k.shape[0] 
-    m = 2 * nx
+    # 1. Déterminer la dimension N à partir des lignes du vecteur colonne
+    N = x_k.shape[0] 
+    nombre_de_points = 2 * N + 1
     
-    cubature_points = np.zeros((nx, m))
+    # 2. Créer la matrice pour stocker les points (N lignes, 2N+1 colonnes)
+    sigma_points = np.zeros((N, nombre_de_points))
     
-    # Filet de sécurité informatique pour le CKF Standard
-    try:
-        L = cholesky(P, lower=True)
-    except np.linalg.LinAlgError:
-        # Si P devient légèrement négative à cause des soustractions, on la force à être positive
-        L = cholesky(P + np.eye(nx) * 1e-6, lower=True)
-        
-    factor = np.sqrt(nx)
+    # 3. Placer x_k à l'index 0 (On extrait les valeurs de la colonne)
+    sigma_points[:, 0] = x_k[:, 0]
     
-    # Génération de la croix (Les 6 points sur la sphère)
-    for i in range(nx):
-        # Voisins "positifs" (Index 0 à nx-1)
-        cubature_points[:, i] = x_k[:, 0] + factor * L[:, i]
+    # 4. Calcul de la racine carrée de la matrice (Cholesky)
+    L = cholesky((N + kappa) * P, lower=True)
+    
+    # 5. La Boucle : Création des voisins
+    for i in range(N):
+        # L[:, i] est une ligne/colonne de dispersion. 
+        # On l'ajoute directement à la colonne de sigma_points
         
-        # Voisins "négatifs" (Index nx à 2nx-1)
-        cubature_points[:, i + nx] = x_k[:, 0] - factor * L[:, i]
+        # Voisins "positifs" (Index 1 à N)
+        sigma_points[:, i + 1] = x_k[:, 0] + L[:, i]
         
-    return cubature_points
-
+        # Voisins "négatifs" (Index N+1 à 2N)
+        sigma_points[:, i + 1 + N] = x_k[:, 0] - L[:, i]
+        
+    return sigma_points
 # --- 1. Configuration et Chargement ---
 Ts = 1.0  #Time sample period
 Qn = 3.05 
@@ -213,11 +219,17 @@ P = 1*np.eye(5)
 theta = np.array([[0.1], [0.1], [0.01], [0.01], [0.01]]) # Vecteur colonne 5x1
 
 soc_estimated = np.zeros(N)
-soc_estimated[0] = 50 # SOC initial du modèle
+soc_estimated[0] = 80 # SOC initial du modèle
 
 theta_history = np.zeros((N, 5))
-# R0_hist = np.zeros(N); R1_hist = np.zeros(N); C1_hist = np.zeros(N)
-# R2_hist = np.zeros(N); C2_hist = np.zeros(N)
+theta_history = np.zeros((N, 5))
+
+R0_hist = np.zeros(N)
+R1_hist = np.zeros(N)
+C1_hist = np.zeros(N)
+R2_hist = np.zeros(N)
+C2_hist = np.zeros(N)
+V_model = np.zeros(N)
 V_model = np.zeros(N)
 
 y_past = np.zeros(2)
@@ -231,18 +243,17 @@ B = np.array([[0],[0],[b3]])
 #C = np.array([[-1,-1,p_coeffs_ocv[0]]])
 D = np.array([[-0.1]]) # -R0
 #P_KF = np.diag([9, 9, 12]) # Plus on augmente plus le gain sera fort au depart
-P_KF = np.diag([1, 1, 1]) # Plus on augmente plus le gain sera fort au depart 
+P_KF = np.diag([1, 1, 0.5]) # Plus on augmente plus le gain sera fort au depart 
 P_zn = np.array([[0.]])
 P_xz = np.array([[0.],[0.],[0.]])
 wk = 0 # Process noise
-Q = np.diag([1e-5, 1e-5, 1e-7]) # Process noise covariance 
+Q = np.diag([1e-4, 1e-4, 1e-3]) # Process noise covariance 
 R_kf = np.array([[0.0001]]) # Covariance of the measurement noise
+kappa = 1
+weight = np.array([[0.4],[0.1],[0.1],[0.1],[0.1],[0.1],[0.1]])  #Reminder: the index 0 is the measured value and sum of coefficients must = 1
 soc_estimated[0] = x_k[2, 0]
 soc_estimated[0] = max(0, min(100, soc_estimated[0]))
 Kn = np.array([[0],[0],[0]])
-dimension = 3
-m = 2*dimension
-W = 1/m
         
     # C. OCV Estimation
 ocv_k = np.polyval(p_coeffs_ocv, soc_estimated[0])
@@ -255,7 +266,7 @@ for k in range(N):
 
     u_k = I_meas[k]
     
-    # D. Pure dynamics
+    # Pure dynamics
     y_rls = ocv_k - V_meas[k]
     
     # --- START OF RLS ---
@@ -265,13 +276,16 @@ for k in range(N):
         if abs(u_k) > 0.05 or abs(u_k - u_past[0]) > 0.05:
             theta, P = rls_step(y_rls, phi_k, theta, P, lmbda)
  
-    # E. Save parameters
+    # Save parameters
     theta_history[k, :] = theta.flatten()
     
     # F. Convert to 2RC
     r0, r1, c1, r2, c2 = theta_to_2rc(theta, Ts)
-    # R0_hist[k] = r0; R1_hist[k] = r1; C1_hist[k] = c1
-    # R2_hist[k] = r2; C2_hist[k] = c2
+    R0_hist[k] = r0
+    R1_hist[k] = r1
+    C1_hist[k] = c1
+    R2_hist[k] = r2
+    C2_hist[k] = c2
 
     # Securite division par zero
     r0 = max(r0, 1e-4)
@@ -296,71 +310,65 @@ for k in range(N):
     B = np.array([[b1],[b2],[b3]])
     D = np.array([[-r0]])
     # C never change
-   # --- Utilisation CKF (Cubature Kalman Filter) ---
+   # --- Utilisation UKF  ---
 
-    # ==========================================
-    # 1. PRÉDICTION (Évolution dans le temps)
-    # ==========================================
+    # 1. PRÉDICTION 
+    sigma_points_pred = np.zeros((3,7))
+
+    #ATTENTION ICI RISQUE DE PROBLEMES DE COMPATIBILITE DES TABLEAUX 
+    sigma_points = generate_sigma_points(x_k,P_KF, kappa)
     
-    # A. Génération de la croix autour de l'état actuel
-    cubature_points = generate_cubature_points(x_k, P_KF)
-    cubature_points_pred = np.zeros((3, m))
+    for i in range(7):
+          
+          x_sigma_pred = A @ sigma_points[:,i].reshape(3,1) + B * u_k
+          sigma_points_pred[:,i] =  x_sigma_pred.flatten()  
+#RAPPEL: sigma_points_pred[:,i] renvoie une matrice (1,3) donc c'est pour cela qu'on utilise flatten qui vient mettre notre (3,1) en (1,3)
+
     
-    # B. Propagation physique dans le modèle A et B
-    for i in range(m):
-        x_sigma_pred = A @ cubature_points[:, i].reshape(3,1) + B * u_k
-        cubature_points_pred[:, i] = x_sigma_pred.flatten()  
+    x_pred = sigma_points_pred @ weight
 
-    # C. Calcul de la Moyenne Prédite
-    x_pred = np.zeros((3, 1))
-    for i in range(m):
-        x_pred += W * cubature_points_pred[:, i].reshape(3,1)
-
-    # D. Calcul de l'Incertitude Prédite (Covariance)
+    #Calcul of covariance matrix
     P_pred = np.copy(Q)
-    for i in range(m):
-        ecart = cubature_points_pred[:, i].reshape(3,1) - x_pred
-        P_pred += W * (ecart @ ecart.T) 
 
 
-    # ==========================================
-    # 2. MISE À JOUR (Correction avec la Mesure)
-    # ==========================================
+    #Matrice de covarian Pn 
+    for i in range(7):  # ICI 7 CAR ON UTILISE UN VECTEUR D'ETAT DE 3 DIMENSIONS
+        ecart = sigma_points_pred[:,i].reshape(3,1) - x_pred
+        P_pred += weight[i,0] * (ecart @ ecart.T) 
+
+
+
+    output_sigma_points_pred = np.zeros((1,7))
     
-    # notre matrice de covariance a change pour etre plus precis dans notre modele il est conseille de regenerer de nouveaux points 
-    cubature_points_update = generate_cubature_points(x_pred, P_pred)
-    output_cubature_points = np.zeros((1, m))
-    
-    # F. Passage dans la fonction de mesure h(x) (Calcul de la tension théorique)
-    for i in range(m):
-        ocv_point = np.polyval(p_coeffs_ocv, cubature_points_update[2, i])
-        y_pred_ckf = -cubature_points_update[0, i] - cubature_points_update[1, i] + (D * u_k).item() + ocv_point
-        output_cubature_points[:, i] = y_pred_ckf
+    for i in range(7):
+        ocv_point = np.polyval(p_coeffs_ocv, sigma_points_pred[2, i])
 
-    # G. Tension théorique moyenne
-    y_pred = 0.0
-    for i in range(m):
-        y_pred += W * output_cubature_points[0, i]
+        y_pred_ukf = -sigma_points_pred[0, i] - sigma_points_pred[1, i] + (D * u_k).item() + ocv_point
+        output_sigma_points_pred[:,i] = y_pred_ukf
 
-    # H. Calcul des Covariances de mesure (Innovation et Croisée)
+    y_pred = (output_sigma_points_pred @ weight).item()
+    #Matrice de covarian Pz 
+    #Matrice de covarian P_xz 
     P_zn = R_kf.item() 
     P_xz = np.zeros((3, 1))
 
-    for i in range(m):
-        ecart_x = cubature_points_update[:, i].reshape(3,1) - x_pred
-        ecart_z = output_cubature_points[0, i] - y_pred
+    for i in range(7):  # ICI 7 CAR ON UTILISE UN VECTEUR D'ETAT DE 3 DIMENSIONS
+        ecart_x = sigma_points_pred[:,i].reshape(3,1) - x_pred
         
-        P_zn += W * (ecart_z ** 2)
-        P_xz += W * (ecart_x * ecart_z)
+        ecart_z = output_sigma_points_pred[0,i] - y_pred
+        
+        P_zn += weight[i, 0].item() * (ecart_z ** 2)
+        P_xz += weight[i, 0].item() * ecart_x * ecart_z
     
-    # I. Équations classiques de Kalman (Gain, État, Covariance)
+
+    # Gain de Kalman (on garde bien la variable C)
     Kn = P_xz / P_zn
+
     innovation = V_meas[k] - y_pred
-    
+    # Mise à jour des états et de la covariance
     x_k = x_pred + Kn * innovation
-    P_KF = P_pred - P_zn * (Kn @ Kn.T) # La fameuse ligne qui peut créer l'instabilité P négative
-    
-    # --- Fin du CKF ---
+    # Traduction littérale : P_nn = P_pred - K @ S @ K.T
+    P_KF = P_pred - P_zn * (Kn @ Kn.T)
     
     ocv_k = np.polyval(p_coeffs_ocv, x_k[2,0])
     # Sauvegarde de la tension
@@ -373,48 +381,77 @@ for k in range(N):
     u_past = np.array([u_k, u_past[0]])
 
 print('Simulation Finished!')
+import pandas as pd
 
 
-# =============================================================================
-# 4. CALCUL DES ERREURS (RMSE) ET AFFICHAGE DES RÉSULTATS
-# =============================================================================
+print("\n==================================================")
+print("GÉNÉRATION DES VECTEURS POUR TYPHOON HIL (Pas de 2%)")
+print("==================================================")
 
-# --- Calcul du RMSE ---
-# On ignore les 10 premières secondes (le temps que le Kalman converge)
-valid_idx = time > 10 
+# 1. Création d'un tableau contenant toutes les données dynamiques
+# On exclut les 500 premières secondes le temps que le filtre converge
+start_idx = 500 
 
-# Formule du RMSE : Racine carrée de la moyenne des erreurs au carré
-rmse_V = np.sqrt(np.mean((V_meas[valid_idx] - V_model[valid_idx])**2))
-rmse_soc = np.sqrt(np.mean((soc_true[valid_idx] - soc_estimated[valid_idx])**2))
+df_params = pd.DataFrame({
+    'Temps': time[start_idx:],
+    'SoC_Estime': soc_estimated[start_idx:],
+    'R0': R0_hist[start_idx:],
+    'R1': R1_hist[start_idx:],
+    'C1': C1_hist[start_idx:],
+    'R2': R2_hist[start_idx:],
+    'C2': C2_hist[start_idx:]
+})
+
+# 2. Création de paliers de SoC tous les 2% (ex: 81.2 devient 82, 80.7 devient 80)
+df_params['SoC_Bin'] = (df_params['SoC_Estime'] / 2).round() * 2
+
+# Calcul de la moyenne de R0, R1, C1, R2, C2 pour chaque palier de 2%
+lut = df_params.groupby('SoC_Bin').mean().reset_index()
+
+# On s'assure que c'est trié du plus petit au plus grand (0 à 100)
+lut = lut.sort_values(by='SoC_Bin', ascending=True)
+
+# 3. Calcul de l'OCV à partir de votre polynôme
+# Attention: on utilise 'SoC_Bin' (0 à 100) car p_coeffs_ocv a été fitté sur cette échelle
+lut['OCV'] = np.polyval(p_coeffs_ocv, lut['SoC_Bin'])
+
+# 4. Conversion du SoC en p.u. (0 à 1) pour Typhoon HIL
+lut['SoC_pu'] = lut['SoC_Bin'] / 100.0
+
+# 5. Fonction pour formater les colonnes en vecteurs Typhoon [x, y, z]
+def create_typhoon_vector(series, decimals=5):
+    # Arrondir pour éviter les nombres trop longs, puis convertir en string
+    values = [str(round(val, decimals)) for val in series]
+    # Joindre avec des virgules et encadrer de crochets
+    return "[" + ", ".join(values) + "]"
+
+# Génération des chaînes de caractères
+vec_soc = create_typhoon_vector(lut['SoC_pu'], 3)
+vec_ocv = create_typhoon_vector(lut['OCV'], 4) # 4 décimales pour la tension
+vec_R0  = create_typhoon_vector(lut['R0'])
+vec_R1  = create_typhoon_vector(lut['R1'])
+vec_C1  = create_typhoon_vector(lut['C1'])
+vec_R2  = create_typhoon_vector(lut['R2'])
+vec_C2  = create_typhoon_vector(lut['C2'])
 
 # Affichage dans la console
-print(f"\nPerformances du Filtre de Kalman (après 10s) :")
-print(f" -> RMSE Tension : {rmse_V:.4f} V")
-print(f" -> RMSE SoC     : {rmse_soc:.2f} %")
+print("Voici les vecteurs à copier-coller dans Typhoon HIL :\n")
+print(f"State of charge vector (p.u.) : \n{vec_soc}\n")
+print(f"Open circuit voltage (V) : \n{vec_ocv}\n")
+print(f"R0 vector : \n{vec_R0}\n")
+print(f"R0 moyenne: {lut['R0'].mean():.5f}\n")
 
-# --- Graphique 1 : Comparaison des Tensions ---
-plt.figure(figsize=(12, 5))
-plt.plot(time, V_meas, label='Tension Measured (Expérimentale)', color='black', linewidth=1.5)
-plt.plot(time, V_model, label='Tension modele(Kalman)', color='red', linestyle='--')
-# On intègre le RMSE directement dans le titre
-plt.title(f'Voltage Comparaison: Measured vs Model Kalman (RMSE = {rmse_V:.4f} V)', fontweight='bold')
-plt.xlabel('Temps (s)', fontweight='bold')
-plt.ylabel('Tension (V)', fontweight='bold')
-plt.legend()
-plt.grid(True, linestyle=':', alpha=0.7)
-plt.tight_layout()
+print(f"R1 vector : \n{vec_R1}\n")
+print(f"R1 moyenne: {lut['R1'].mean():.5f}\n")
 
-# --- Graphique 2 : Comparaison du SoC ---
-plt.figure(figsize=(12, 5))
-plt.plot(time, soc_true, label='SoC REAL (Intégration Théorique)', color='black', linewidth=1.5)
-plt.plot(time, soc_estimated, label='SoC Model (Filtre Kalman)', color='blue', linestyle='--')
-# On intègre le RMSE directement dans le titre
-plt.title(f'State of charge(SoC) : Real vs Estimated (RMSE = {rmse_soc:.2f} %)', fontweight='bold')
-plt.xlabel('Temps (s)', fontweight='bold')
-plt.ylabel('State of Charge (%)', fontweight='bold')
-plt.legend()
-plt.grid(True, linestyle=':', alpha=0.7)
-plt.tight_layout()
+print(f"C1 vector : \n{vec_C1}\n")
+print(f"C1 moyenne: {lut['C1'].mean():.5f}\n")
 
-# Afficher les graphiques
-plt.show()
+print(f"R2 vector : \n{vec_R2}\n")
+print(f"R2 moyenne: {lut['R2'].mean():.5f}\n")
+
+print(f"C2 vector : \n{vec_C2}\n")
+print(f"C2 moyenne: {lut['C2'].mean():.5f}\n")
+
+
+

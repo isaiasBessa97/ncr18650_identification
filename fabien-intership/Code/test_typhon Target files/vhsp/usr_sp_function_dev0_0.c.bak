@@ -1,0 +1,1550 @@
+// generated using template: cop_main.template---------------------------------------------
+/******************************************************************************************
+**
+**  Module Name: cop_main.c
+**  NOTE: Automatically generated file. DO NOT MODIFY!
+**  Description:
+**            Main file
+**
+******************************************************************************************/
+// generated using template: arm/custom_include.template-----------------------------------
+
+
+#ifdef __cplusplus
+#include <limits>
+
+extern "C" {
+#endif
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+#include <stdint.h>
+#include <complex.h>
+#include <time.h>
+#include <stdarg.h>
+
+// x86 libraries:
+#include "../include/sp_functions_dev0.h"
+
+
+#ifdef __cplusplus
+}
+#endif
+
+
+// ----------------------------------------------------------------------------------------                // generated using template:generic_macros.template-----------------------------------------
+/*********************** Macros (Inline Functions) Definitions ***************************/
+
+// ----------------------------------------------------------------------------------------
+
+#ifndef MAX
+#define MAX(value, limit) (((value) > (limit)) ? (value) : (limit))
+#endif
+#ifndef MIN
+#define MIN(value, limit) (((value) < (limit)) ? (value) : (limit))
+#endif
+
+// generated using template: VirtualHIL/custom_defines.template----------------------------
+
+typedef unsigned char X_UnInt8;
+typedef char X_Int8;
+typedef signed short X_Int16;
+typedef unsigned short X_UnInt16;
+typedef int X_Int32;
+typedef unsigned int X_UnInt32;
+typedef unsigned int uint;
+typedef double real;
+
+// ----------------------------------------------------------------------------------------                
+// generated using template: custom_consts.template----------------------------------------
+
+// arithmetic constants
+#define C_SQRT_2                    1.4142135623730950488016887242097f
+#define C_SQRT_3                    1.7320508075688772935274463415059f
+#define C_PI                        3.1415926535897932384626433832795f
+#define C_E                         2.7182818284590452353602874713527f
+#define C_2PI                       6.283185307179586476925286766559f
+
+//@cmp.def.start
+//component defines
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//@cmp.def.end
+
+
+//-----------------------------------------------------------------------------------------                 
+// generated using template: common_variables.template-------------------------------------
+// true global variables
+
+
+
+
+
+// const variables
+    
+static const real _battery_cell1_hysteresis_constant_0__p_value=0.0;
+
+    static const int _battery_cell1_it_ia1__n_rd_as=13107200;
+static const unsigned int _battery_cell1_it_ia1__p_addr=1;static const char* _battery_cell1_it_ia1__p_sig_output="True";
+
+    
+static const real _battery_cell1_passive_balancing_constant_0__p_value=0.0;
+
+    
+static const real _battery_cell1_soc_model_edge_detection1_unit_delay1__p_init_value=0.0;
+
+    
+static const real _battery_cell1_constant_one__p_value=1.0;
+
+    
+static const real _battery_cell1_constant_zero__p_value=0.0;
+
+    
+static const int _temperature__p_value=25;
+
+    
+
+
+    
+
+
+    
+static const char* _battery_cell1_soc_model_edge_detection1_relational_operator1__p_relational_op="!=";
+
+    
+
+
+    
+
+
+    static const int _battery_cell1_product2__n_in_size=1;static const int _battery_cell1_product2__n_num_of_terminals=2;static const unsigned char _battery_cell1_product2__n_signs_bool[2]={1, 1};
+
+
+    
+
+
+    
+
+
+    
+
+
+    static const int _battery_cell1_t_source_switch__n_out_size=1;
+static const char* _battery_cell1_t_source_switch__p_criterion="ctrl > threshold";static const real _battery_cell1_t_source_switch__p_threshold=0.5;
+
+    static const int _battery_cell1_soc_model_integrator__n_initial_value[1]={0};static const real _battery_cell1_soc_model_integrator__n_lower_limit[1]={0.0};static const real _battery_cell1_soc_model_integrator__n_upper_limit[1]={1.0};
+static const real _battery_cell1_soc_model_integrator__p_execution_rate=0.0001;static const unsigned char _battery_cell1_soc_model_integrator__p_limit_output=1;static const char* _battery_cell1_soc_model_integrator__p_mode="integrator";static const char* _battery_cell1_soc_model_integrator__p_show_reset="rising";
+
+    static const char* _battery_cell1_cell_no__n_multiplication="Element-wise(K.*u)";
+static const real _battery_cell1_cell_no__p_gain=1.0;
+
+    static const real _battery_cell1_capacity_lut_2d__n_input_offset_x=-0.0;static const real _battery_cell1_capacity_lut_2d__n_input_offset_y=-0.0;static const real _battery_cell1_capacity_lut_2d__n_input_sf_x=1.0;static const real _battery_cell1_capacity_lut_2d__n_input_sf_y=1.0;static const real _battery_cell1_capacity_lut_2d__n_max_x=1.0;static const real _battery_cell1_capacity_lut_2d__n_max_y=1.0;static const real _battery_cell1_capacity_lut_2d__n_min_x=0.0;static const real _battery_cell1_capacity_lut_2d__n_min_y=0.0;static const real _battery_cell1_capacity_lut_2d__n_x[2]={0.0, 1.0};static const real _battery_cell1_capacity_lut_2d__n_y[2]={0.0, 1.0};static const real _battery_cell1_capacity_lut_2d__n_z[2][2]={{3.05, 3.05}, {3.05, 3.05}};
+static const char* _battery_cell1_capacity_lut_2d__p_ext_mode="Clip";static const char* _battery_cell1_capacity_lut_2d__p_table_impl="Non-equidistant";
+
+    static const real _battery_cell1_coulombic_efficiency_lut_2d__n_input_offset_x=-0.0;static const real _battery_cell1_coulombic_efficiency_lut_2d__n_input_offset_y=-0.0;static const real _battery_cell1_coulombic_efficiency_lut_2d__n_input_sf_x=1.0;static const real _battery_cell1_coulombic_efficiency_lut_2d__n_input_sf_y=1.0;static const real _battery_cell1_coulombic_efficiency_lut_2d__n_max_x=1.0;static const real _battery_cell1_coulombic_efficiency_lut_2d__n_max_y=1.0;static const real _battery_cell1_coulombic_efficiency_lut_2d__n_min_x=0.0;static const real _battery_cell1_coulombic_efficiency_lut_2d__n_min_y=0.0;static const real _battery_cell1_coulombic_efficiency_lut_2d__n_x[2]={0.0, 1.0};static const real _battery_cell1_coulombic_efficiency_lut_2d__n_y[2]={0.0, 1.0};static const real _battery_cell1_coulombic_efficiency_lut_2d__n_z[2][2]={{0.99, 0.99}, {0.99, 0.99}};
+static const char* _battery_cell1_coulombic_efficiency_lut_2d__p_ext_mode="Clip";static const char* _battery_cell1_coulombic_efficiency_lut_2d__p_table_impl="Non-equidistant";
+
+    
+
+
+    static const real _battery_cell1_internal_resistance_lut_2d__n_input_offset_x=-0.0;static const real _battery_cell1_internal_resistance_lut_2d__n_input_offset_y=-0.0;static const real _battery_cell1_internal_resistance_lut_2d__n_input_sf_x=1.0;static const real _battery_cell1_internal_resistance_lut_2d__n_input_sf_y=1.0;static const real _battery_cell1_internal_resistance_lut_2d__n_max_x=1.0;static const real _battery_cell1_internal_resistance_lut_2d__n_max_y=1.0;static const real _battery_cell1_internal_resistance_lut_2d__n_min_x=0.0;static const real _battery_cell1_internal_resistance_lut_2d__n_min_y=0.0;static const real _battery_cell1_internal_resistance_lut_2d__n_x[2]={0.0, 1.0};static const real _battery_cell1_internal_resistance_lut_2d__n_y[2]={0.0, 1.0};static const real _battery_cell1_internal_resistance_lut_2d__n_z[2][2]={{0.0443, 0.0443}, {0.0443, 0.0443}};
+static const char* _battery_cell1_internal_resistance_lut_2d__p_ext_mode="Clip";static const char* _battery_cell1_internal_resistance_lut_2d__p_table_impl="Non-equidistant";
+
+    static const real _battery_cell1_parallel_rc_lut_2d_c1__n_input_offset_x=-0.0;static const real _battery_cell1_parallel_rc_lut_2d_c1__n_input_offset_y=-0.0;static const real _battery_cell1_parallel_rc_lut_2d_c1__n_input_sf_x=1.0;static const real _battery_cell1_parallel_rc_lut_2d_c1__n_input_sf_y=1.0;static const real _battery_cell1_parallel_rc_lut_2d_c1__n_max_x=1.0;static const real _battery_cell1_parallel_rc_lut_2d_c1__n_max_y=1.0;static const real _battery_cell1_parallel_rc_lut_2d_c1__n_min_x=0.0;static const real _battery_cell1_parallel_rc_lut_2d_c1__n_min_y=0.0;static const real _battery_cell1_parallel_rc_lut_2d_c1__n_x[2]={0.0, 1.0};static const real _battery_cell1_parallel_rc_lut_2d_c1__n_y[2]={0.0, 1.0};static const real _battery_cell1_parallel_rc_lut_2d_c1__n_z[2][2]={{20.20678, 20.20678}, {20.20678, 20.20678}};
+static const char* _battery_cell1_parallel_rc_lut_2d_c1__p_ext_mode="Clip";static const char* _battery_cell1_parallel_rc_lut_2d_c1__p_table_impl="Equidistant";
+
+    static const real _battery_cell1_parallel_rc_lut_2d_c2__n_input_offset_x=-0.0;static const real _battery_cell1_parallel_rc_lut_2d_c2__n_input_offset_y=-0.0;static const real _battery_cell1_parallel_rc_lut_2d_c2__n_input_sf_x=1.0;static const real _battery_cell1_parallel_rc_lut_2d_c2__n_input_sf_y=1.0;static const real _battery_cell1_parallel_rc_lut_2d_c2__n_max_x=1.0;static const real _battery_cell1_parallel_rc_lut_2d_c2__n_max_y=1.0;static const real _battery_cell1_parallel_rc_lut_2d_c2__n_min_x=0.0;static const real _battery_cell1_parallel_rc_lut_2d_c2__n_min_y=0.0;static const real _battery_cell1_parallel_rc_lut_2d_c2__n_x[2]={0.0, 1.0};static const real _battery_cell1_parallel_rc_lut_2d_c2__n_y[2]={0.0, 1.0};static const real _battery_cell1_parallel_rc_lut_2d_c2__n_z[2][2]={{20.20678, 20.20678}, {20.20678, 20.20678}};
+static const char* _battery_cell1_parallel_rc_lut_2d_c2__p_ext_mode="Clip";static const char* _battery_cell1_parallel_rc_lut_2d_c2__p_table_impl="Equidistant";
+
+    static const real _battery_cell1_parallel_rc_lut_2d_r1__n_input_offset_x=-0.0;static const real _battery_cell1_parallel_rc_lut_2d_r1__n_input_offset_y=-0.0;static const real _battery_cell1_parallel_rc_lut_2d_r1__n_input_sf_x=1.0;static const real _battery_cell1_parallel_rc_lut_2d_r1__n_input_sf_y=1.0;static const real _battery_cell1_parallel_rc_lut_2d_r1__n_max_x=1.0;static const real _battery_cell1_parallel_rc_lut_2d_r1__n_max_y=1.0;static const real _battery_cell1_parallel_rc_lut_2d_r1__n_min_x=0.0;static const real _battery_cell1_parallel_rc_lut_2d_r1__n_min_y=0.0;static const real _battery_cell1_parallel_rc_lut_2d_r1__n_x[2]={0.0, 1.0};static const real _battery_cell1_parallel_rc_lut_2d_r1__n_y[2]={0.0, 1.0};static const real _battery_cell1_parallel_rc_lut_2d_r1__n_z[2][2]={{0.09954, 0.09954}, {0.09954, 0.09954}};
+static const char* _battery_cell1_parallel_rc_lut_2d_r1__p_ext_mode="Clip";static const char* _battery_cell1_parallel_rc_lut_2d_r1__p_table_impl="Equidistant";
+
+    static const real _battery_cell1_parallel_rc_lut_2d_r2__n_input_offset_x=-0.0;static const real _battery_cell1_parallel_rc_lut_2d_r2__n_input_offset_y=-0.0;static const real _battery_cell1_parallel_rc_lut_2d_r2__n_input_sf_x=1.0;static const real _battery_cell1_parallel_rc_lut_2d_r2__n_input_sf_y=1.0;static const real _battery_cell1_parallel_rc_lut_2d_r2__n_max_x=1.0;static const real _battery_cell1_parallel_rc_lut_2d_r2__n_max_y=1.0;static const real _battery_cell1_parallel_rc_lut_2d_r2__n_min_x=0.0;static const real _battery_cell1_parallel_rc_lut_2d_r2__n_min_y=0.0;static const real _battery_cell1_parallel_rc_lut_2d_r2__n_x[2]={0.0, 1.0};static const real _battery_cell1_parallel_rc_lut_2d_r2__n_y[2]={0.0, 1.0};static const real _battery_cell1_parallel_rc_lut_2d_r2__n_z[2][2]={{0.02539, 0.02539}, {0.02539, 0.02539}};
+static const char* _battery_cell1_parallel_rc_lut_2d_r2__p_ext_mode="Clip";static const char* _battery_cell1_parallel_rc_lut_2d_r2__p_table_impl="Equidistant";
+
+    
+
+
+    
+
+
+    
+
+
+    static const real _battery_cell1_open_circuit_voltage_lut_2d__n_input_offset_x=-0.0;static const real _battery_cell1_open_circuit_voltage_lut_2d__n_input_offset_y=-0.14;static const real _battery_cell1_open_circuit_voltage_lut_2d__n_input_sf_x=1.0;static const real _battery_cell1_open_circuit_voltage_lut_2d__n_input_sf_y=50.00000000000001;static const real _battery_cell1_open_circuit_voltage_lut_2d__n_max_x=1.0;static const real _battery_cell1_open_circuit_voltage_lut_2d__n_max_y=0.94;static const real _battery_cell1_open_circuit_voltage_lut_2d__n_min_x=0.0;static const real _battery_cell1_open_circuit_voltage_lut_2d__n_min_y=0.14;static const real _battery_cell1_open_circuit_voltage_lut_2d__n_x[2]={0.0, 1.0};static const real _battery_cell1_open_circuit_voltage_lut_2d__n_y[41]={0.14, 0.16, 0.18, 0.2, 0.22, 0.24, 0.26, 0.28, 0.3, 0.32, 0.34, 0.36, 0.38, 0.4, 0.42, 0.44, 0.46, 0.48, 0.5, 0.52, 0.54, 0.56, 0.58, 0.6, 0.62, 0.64, 0.66, 0.68, 0.7, 0.72, 0.74, 0.76, 0.78, 0.8, 0.82, 0.84, 0.86, 0.88, 0.9, 0.92, 0.94};static const real _battery_cell1_open_circuit_voltage_lut_2d__n_z[2][41]={{3.4113, 3.4248, 3.4447, 3.4693, 3.4963, 3.5233, 3.5482, 3.5696, 3.5867, 3.5995, 3.6085, 3.6148, 3.6197, 3.6244, 3.6302, 3.6382, 3.6492, 3.6636, 3.6813, 3.7021, 3.7253, 3.7499, 3.775, 3.7995, 3.8225, 3.8431, 3.861, 3.8761, 3.8886, 3.8994, 3.9094, 3.9201, 3.9327, 3.9488, 3.9692, 3.9943, 4.0236, 4.0553, 4.0862, 4.1113, 4.1237}, {3.4113, 3.4248, 3.4447, 3.4693, 3.4963, 3.5233, 3.5482, 3.5696, 3.5867, 3.5995, 3.6085, 3.6148, 3.6197, 3.6244, 3.6302, 3.6382, 3.6492, 3.6636, 3.6813, 3.7021, 3.7253, 3.7499, 3.775, 3.7995, 3.8225, 3.8431, 3.861, 3.8761, 3.8886, 3.8994, 3.9094, 3.9201, 3.9327, 3.9488, 3.9692, 3.9943, 4.0236, 4.0553, 4.0862, 4.1113, 4.1237}};
+static const char* _battery_cell1_open_circuit_voltage_lut_2d__p_ext_mode="Linear";static const char* _battery_cell1_open_circuit_voltage_lut_2d__p_table_impl="Equidistant";
+
+    static const int _battery_cell1_soc__n_out_size=1;
+static const unsigned int _battery_cell1_soc__p_addr=16385;
+
+    
+
+
+    static const int _battery_cell1_sum9__n_in_size=1;static const int _battery_cell1_sum9__n_num_of_inputs=2;static const unsigned char _battery_cell1_sum9__n_signs_bool[2]={1, 1};
+
+
+    static const char* _battery_cell1_hysteresis_to_as__n_multiplication="Element-wise(K.*u)";
+static const real _battery_cell1_hysteresis_to_as__p_gain=3600.0;
+
+    static const char* _battery_cell1_soc_model_gain1__n_multiplication="Element-wise(K.*u)";
+static const real _battery_cell1_soc_model_gain1__p_gain=-3600.0;
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    static const int _battery_cell1_series_voltage_drop_product__n_in_size=1;static const int _battery_cell1_series_voltage_drop_product__n_num_of_terminals=2;static const unsigned char _battery_cell1_series_voltage_drop_product__n_signs_bool[2]={1, 1};
+
+
+    
+
+
+    
+
+
+    static const int _battery_cell1_parallel_rc_sum__n_in_size=1;static const int _battery_cell1_parallel_rc_sum__n_num_of_inputs=2;static const unsigned char _battery_cell1_parallel_rc_sum__n_signs_bool[2]={1, 1};
+
+
+    static const int _battery_cell1_parallel_rc_sum1__n_in_size=1;static const int _battery_cell1_parallel_rc_sum1__n_num_of_inputs=2;static const unsigned char _battery_cell1_parallel_rc_sum1__n_signs_bool[2]={1, 1};
+
+
+    static const int _battery_cell1_soc_model_product1__n_in_size=1;static const int _battery_cell1_soc_model_product1__n_num_of_terminals=2;static const unsigned char _battery_cell1_soc_model_product1__n_signs_bool[2]={1, 0};
+
+
+    
+
+
+    static const int _battery_cell1_sum3__n_in_size=1;static const int _battery_cell1_sum3__n_num_of_inputs=4;static const unsigned char _battery_cell1_sum3__n_signs_bool[4]={1, 1, 0, 0};
+
+
+    
+
+
+    
+
+
+    static const int _battery_cell1_signal_switch1__n_out_size=1;
+static const char* _battery_cell1_signal_switch1__p_criterion="ctrl > threshold";static const real _battery_cell1_signal_switch1__p_threshold=0.5;
+
+    static const int _battery_cell1_product1__n_in_size=1;static const int _battery_cell1_product1__n_num_of_terminals=2;static const unsigned char _battery_cell1_product1__n_signs_bool[2]={1, 1};
+
+
+    static const int _battery_cell1_cell_voltage__n_out_size=1;
+static const unsigned int _battery_cell1_cell_voltage__p_addr=16384;
+
+    
+
+
+    static const int _battery_cell1_vt_vs1__n_spc_baseaddr=134217728;static const int _battery_cell1_vt_vs1__n_spc_off=4194304;static const int _battery_cell1_vt_vs1__n_spc_sp=2883584;static const int _battery_cell1_vt_vs1__n_spc_tv=3145728;static const char* _battery_cell1_vt_vs1__n_val_of_type="signal controlled";
+static const unsigned int _battery_cell1_vt_vs1__p_addr=0;static const unsigned int _battery_cell1_vt_vs1__p_spc_nb=0;
+
+    
+
+
+
+//@cmp.var.start
+// variables
+    static real _battery_cell1_hysteresis_constant_0__out;
+    real _battery_cell1_it_ia1__out;
+    static real _battery_cell1_passive_balancing_constant_0__out;
+    static real _battery_cell1_soc_model_edge_detection1_unit_delay1__out;
+    double _battery_cell1_soc_model_soc_override__out;
+    double _battery_cell1_soh_set__out;
+    X_UnInt32 _battery_cell1_temperature_source__out;
+    X_Int32 _battery_cell1_vcell_override__out;
+    double _battery_cell1_vcell_value_set__out;
+    static real _battery_cell1_constant_one__out;
+    static real _battery_cell1_constant_zero__out;
+    static int _temperature__out;
+    
+    
+    static real _battery_cell1_soc_model_edge_detection1_relational_operator1__out;
+    
+    
+    static real _battery_cell1_product2__out;
+    
+    
+    
+    static real _battery_cell1_t_source_switch__out;
+    static real _battery_cell1_soc_model_integrator__out;
+    static real _battery_cell1_cell_no__out;
+    static real _battery_cell1_capacity_lut_2d__value;
+    static real _battery_cell1_coulombic_efficiency_lut_2d__value;
+    
+    static real _battery_cell1_internal_resistance_lut_2d__value;
+    static real _battery_cell1_parallel_rc_lut_2d_c1__value;
+    static real _battery_cell1_parallel_rc_lut_2d_c2__value;
+    static real _battery_cell1_parallel_rc_lut_2d_r1__value;
+    static real _battery_cell1_parallel_rc_lut_2d_r2__value;
+    
+    
+    
+    static real _battery_cell1_open_circuit_voltage_lut_2d__value;
+  
+
+  
+    
+    static real _battery_cell1_sum9__out;
+    static real _battery_cell1_hysteresis_to_as__out;
+    static real _battery_cell1_soc_model_gain1__out;
+    
+    
+    
+    
+    
+                double _battery_cell1_parallel_rc_rc_func_1__C;
+                double _battery_cell1_parallel_rc_rc_func_1__R;
+                double _battery_cell1_parallel_rc_rc_func_1__curr;
+
+                        double _battery_cell1_parallel_rc_rc_func_1__Ploss;
+                    double _battery_cell1_parallel_rc_rc_func_1__Vrc;
+
+                double _battery_cell1_parallel_rc_rc_func_2__C;
+                double _battery_cell1_parallel_rc_rc_func_2__R;
+                double _battery_cell1_parallel_rc_rc_func_2__curr;
+
+                        double _battery_cell1_parallel_rc_rc_func_2__Ploss;
+                    double _battery_cell1_parallel_rc_rc_func_2__Vrc;
+
+    
+                double _battery_cell1_soc_model_coulombic_eff__eta;
+                double _battery_cell1_soc_model_coulombic_eff__i;
+
+                        double _battery_cell1_soc_model_coulombic_eff__i_out;
+
+    static real _battery_cell1_series_voltage_drop_product__out;
+    
+    
+    static real _battery_cell1_parallel_rc_sum__out;
+    static real _battery_cell1_parallel_rc_sum1__out;
+    static real _battery_cell1_soc_model_product1__out;
+    
+    static real _battery_cell1_sum3__out;
+    
+    
+    static real _battery_cell1_signal_switch1__out;
+    static real _battery_cell1_product1__out;
+  
+
+  
+    
+    
+    
+//@cmp.var.end
+
+//@cmp.svar.start
+// state variables
+    
+
+
+    
+
+
+    
+
+
+    real _battery_cell1_soc_model_edge_detection1_unit_delay1__state;
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    real _battery_cell1_soc_model_integrator__state;real _battery_cell1_soc_model_integrator__reset_state;
+int _battery_cell1_soc_model_integrator__dynamic_init;
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+            double _battery_cell1_parallel_rc_rc_func_1__Vrc_mem;
+
+            double _battery_cell1_parallel_rc_rc_func_1__Tau;
+
+            double _battery_cell1_parallel_rc_rc_func_1__var;
+
+            double _battery_cell1_parallel_rc_rc_func_1__R_I;
+
+    
+
+            double _battery_cell1_parallel_rc_rc_func_2__Vrc_mem;
+
+            double _battery_cell1_parallel_rc_rc_func_2__Tau;
+
+            double _battery_cell1_parallel_rc_rc_func_2__var;
+
+            double _battery_cell1_parallel_rc_rc_func_2__R_I;
+
+    
+
+    
+
+
+
+    
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+    
+
+
+//@cmp.svar.end
+
+// IO shared variables
+
+//
+// Tunable parameters
+//
+static struct Tunable_params {
+} __attribute__((__packed__)) tunable_params;
+
+void *tunable_params_dev0_cpu0_ptr = &tunable_params;
+
+// Dll function pointers
+#if defined(_WIN64)
+#else
+    // Define handles for loading dlls
+#endif
+
+
+
+
+
+// generated using template: \templates\virtual_hil\fmi_custom_logger_fncs.template---------------------------------
+#include <stdarg.h>
+
+                
+
+              //
+// DMA buffers
+//
+
+
+
+
+        
+
+        
+
+        
+
+        
+
+    
+    
+    
+    
+    
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+    
+    
+        
+
+    
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+    
+    
+    
+    
+    
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+    
+    
+        
+
+    
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+
+// generated using template: virtual_hil/custom_functions.template---------------------------------
+void ReInit_user_sp_cpu0_dev0(){
+
+#if DEBUG_MODE
+    printf("\n\rReInitTimer");
+#endif
+
+
+    //@cmp.init.block.start
+        
+
+        
+
+        
+
+        {
+_battery_cell1_soc_model_edge_detection1_unit_delay1__state=_battery_cell1_soc_model_edge_detection1_unit_delay1__p_init_value;
+}
+
+    
+    
+    
+    
+    
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        _battery_cell1_soc_model_integrator__dynamic_init = 1;
+{
+_battery_cell1_soc_model_integrator__state=0;_battery_cell1_soc_model_integrator__reset_state=0;
+}
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+      
+{
+HIL_OutAO(0x4001, 0);}
+
+  
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        {
+    _battery_cell1_parallel_rc_rc_func_1__Vrc_mem = 0 ;
+}
+
+        {
+    _battery_cell1_parallel_rc_rc_func_2__Vrc_mem = 0 ;
+}
+
+        
+
+        {
+}
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+
+      
+{
+HIL_OutAO(0x4000, 0);}
+
+  
+
+        
+
+        
+{
+HIL_OutFloat(0x82c0000, 0.0);}
+        
+
+    //@cmp.init.block.end
+}
+
+
+// Dll function pointers and dll reload function
+#if defined(_WIN64)
+    // Define method for reloading dll functions
+    void ReloadDllFunctions_user_sp_cpu0_dev0(void) {
+        // Load each library and setup function pointers
+    }
+
+    void FreeDllFunctions_user_sp_cpu0_dev0(void) {
+    }
+
+#else
+    // Define method for reloading dll functions
+    void ReloadDllFunctions_user_sp_cpu0_dev0(void) {
+        // Load each library and setup function pointers
+    }
+
+    void FreeDllFunctions_user_sp_cpu0_dev0(void) {
+    }
+#endif
+
+void load_fmi_libraries_user_sp_cpu0_dev0(void) {
+    #if defined(_WIN64)
+    #else
+    #endif
+}
+
+
+void ReInit_sp_scope_user_sp_cpu0_dev0(){
+    // initialise SP Scope buffer pointer
+}
+
+              
+// generated using template: virtual_hil/common_timer_counter_handler.template-------------------------
+
+/*****************************************************************************************/
+/**
+* This function is the handler which performs processing for the timer counter.
+* It is called from an interrupt context such that the amount of processing
+* performed should be minimized.  It is called when the timer counter expires
+* if interrupts are enabled.
+*
+*
+* @param    None
+*
+* @return   None
+*
+* @note     None
+*
+*****************************************************************************************/
+
+void TimerCounterHandler_0_user_sp_cpu0_dev0() {
+
+#if DEBUG_MODE
+    printf("\n\rTimerCounterHandler_0");
+#endif
+
+    //////////////////////////////////////////////////////////////////////////
+    // Output block
+    //////////////////////////////////////////////////////////////////////////
+    //@cmp.out.block.start
+         // Generated from the component: Battery Cell1.Hysteresis.Constant_0
+            {
+_battery_cell1_hysteresis_constant_0__out=_battery_cell1_hysteresis_constant_0__p_value;}
+
+         // Generated from the component: Battery Cell1.It.Ia1
+            {
+real tac_tmp1;tac_tmp1=HIL_InFloat(0xc80001);_battery_cell1_it_ia1__out=tac_tmp1;}
+
+         // Generated from the component: Battery Cell1.Passive Balancing.Constant_0
+            {
+_battery_cell1_passive_balancing_constant_0__out=_battery_cell1_passive_balancing_constant_0__p_value;}
+
+         // Generated from the component: Battery Cell1.SOC Model.Edge Detection1.Unit Delay1
+            {
+_battery_cell1_soc_model_edge_detection1_unit_delay1__out=_battery_cell1_soc_model_edge_detection1_unit_delay1__state;}
+
+         // Generated from the component: Battery Cell1.SOC Model.SOC Override
+                    _battery_cell1_soc_model_soc_override__out = XIo_InFloat(0x2f800000);
+
+         // Generated from the component: Battery Cell1.SOH_set
+                    _battery_cell1_soh_set__out = XIo_InFloat(0x2f800004);
+
+         // Generated from the component: Battery Cell1.Temperature source
+                    _battery_cell1_temperature_source__out = XIo_InInt32(0x2f800008);
+
+         // Generated from the component: Battery Cell1.Vcell Override
+                    _battery_cell1_vcell_override__out = XIo_InInt32(0x2f80000c);
+
+         // Generated from the component: Battery Cell1.Vcell Value Set
+                    _battery_cell1_vcell_value_set__out = XIo_InFloat(0x2f800010);
+
+         // Generated from the component: Battery Cell1.constant one
+            {
+_battery_cell1_constant_one__out=_battery_cell1_constant_one__p_value;}
+
+         // Generated from the component: Battery Cell1.constant zero
+            {
+_battery_cell1_constant_zero__out=_battery_cell1_constant_zero__p_value;}
+
+         // Generated from the component: temperature
+            {
+_temperature__out=_temperature__p_value;}
+
+         // Generated from the component: Battery Cell1.Termination9
+            {
+}
+
+         // Generated from the component: Battery Cell1.Termination2
+            {
+}
+
+         // Generated from the component: Battery Cell1.SOC Model.Edge Detection1.Relational operator1
+            {
+if((0)){_battery_cell1_soc_model_edge_detection1_relational_operator1__out=((real) (_battery_cell1_soc_model_soc_override__out == _battery_cell1_soc_model_edge_detection1_unit_delay1__out));}else{if((1)){_battery_cell1_soc_model_edge_detection1_relational_operator1__out=((real) (_battery_cell1_soc_model_soc_override__out != _battery_cell1_soc_model_edge_detection1_unit_delay1__out));}else{if((0)){_battery_cell1_soc_model_edge_detection1_relational_operator1__out=((real) (_battery_cell1_soc_model_soc_override__out <= _battery_cell1_soc_model_edge_detection1_unit_delay1__out));}else{if((0)){_battery_cell1_soc_model_edge_detection1_relational_operator1__out=((real) (_battery_cell1_soc_model_soc_override__out >= _battery_cell1_soc_model_edge_detection1_unit_delay1__out));}else{if((0)){_battery_cell1_soc_model_edge_detection1_relational_operator1__out=((real) (_battery_cell1_soc_model_soc_override__out < _battery_cell1_soc_model_edge_detection1_unit_delay1__out));}else{if((0)){_battery_cell1_soc_model_edge_detection1_relational_operator1__out=((real) (_battery_cell1_soc_model_soc_override__out > _battery_cell1_soc_model_edge_detection1_unit_delay1__out));}else{_battery_cell1_soc_model_edge_detection1_relational_operator1__out=0;}}}}}}}
+
+         // Generated from the component: Battery Cell1.Parallel RC.Termination3
+            {
+}
+
+         // Generated from the component: Battery Cell1.Termination1
+            {
+}
+
+         // Generated from the component: Battery Cell1.Product2
+            {
+_battery_cell1_product2__out=1;_battery_cell1_product2__out*=_battery_cell1_it_ia1__out;_battery_cell1_product2__out*=_battery_cell1_constant_one__out;}
+
+         // Generated from the component: Battery Cell1.Termination15
+            {
+}
+
+         // Generated from the component: Battery Cell1.Termination16
+            {
+}
+
+         // Generated from the component: Battery Cell1.Termination17
+            {
+}
+
+         // Generated from the component: Battery Cell1.T_source_switch
+            {
+{if((0)){if(((_battery_cell1_temperature_source__out < _battery_cell1_t_source_switch__p_threshold))){_battery_cell1_t_source_switch__out=_temperature__out;}else{_battery_cell1_t_source_switch__out=_battery_cell1_constant_zero__out;}}else{if((1)){if(((_battery_cell1_temperature_source__out > _battery_cell1_t_source_switch__p_threshold))){_battery_cell1_t_source_switch__out=_battery_cell1_constant_zero__out;}else{_battery_cell1_t_source_switch__out=_temperature__out;}}else{if(((_battery_cell1_temperature_source__out != _battery_cell1_t_source_switch__p_threshold))){_battery_cell1_t_source_switch__out=_battery_cell1_constant_zero__out;}else{_battery_cell1_t_source_switch__out=_temperature__out;}}}}}
+
+         // Generated from the component: Battery Cell1.SOC Model.Integrator
+            
+/*dynamic init*/
+if(_battery_cell1_soc_model_integrator__dynamic_init){{
+_battery_cell1_soc_model_integrator__reset_state=0;_battery_cell1_soc_model_integrator__state=_battery_cell1_soc_model_soc_override__out;}_battery_cell1_soc_model_integrator__dynamic_init = 0;}
+{
+_battery_cell1_soc_model_integrator__out=_battery_cell1_soc_model_integrator__state;{{{if((1)){if(((_battery_cell1_soc_model_edge_detection1_relational_operator1__out > 0) && (_battery_cell1_soc_model_integrator__reset_state <= 0))){_battery_cell1_soc_model_integrator__out=_battery_cell1_soc_model_soc_override__out;}}else{if((0)){if(((_battery_cell1_soc_model_edge_detection1_relational_operator1__out <= 0) && (_battery_cell1_soc_model_integrator__reset_state > 0))){_battery_cell1_soc_model_integrator__out=_battery_cell1_soc_model_soc_override__out;}}else{if((0)){if(((((_battery_cell1_soc_model_edge_detection1_relational_operator1__out > 0) && (_battery_cell1_soc_model_integrator__reset_state <= 0))) || (((_battery_cell1_soc_model_edge_detection1_relational_operator1__out <= 0) && (_battery_cell1_soc_model_integrator__reset_state > 0))))){_battery_cell1_soc_model_integrator__out=_battery_cell1_soc_model_soc_override__out;}}else{if((0)){if((_battery_cell1_soc_model_edge_detection1_relational_operator1__out != 0)){_battery_cell1_soc_model_integrator__out=_battery_cell1_soc_model_soc_override__out;}}}}}}}}}
+
+         // Generated from the component: Battery Cell1.Cell_NO
+            {
+_battery_cell1_cell_no__out=(_battery_cell1_cell_no__p_gain * _battery_cell1_product2__out);}
+
+         // Generated from the component: Battery Cell1.Capacity.LUT_2D
+            {
+if((0)){int down_x=0;int down_y=0;int up_x=0;int up_y=0;real x_int_coeff=0.0;real y_int_coeff=0.0;if((1)){real input_x_clipped=0.0;real input_y_clipped=0.0;input_x_clipped=((((_battery_cell1_soh_set__out) > (_battery_cell1_capacity_lut_2d__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_capacity_lut_2d__n_min_x))) < (_battery_cell1_capacity_lut_2d__n_max_x) ? (((_battery_cell1_soh_set__out) > (_battery_cell1_capacity_lut_2d__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_capacity_lut_2d__n_min_x))) : (_battery_cell1_capacity_lut_2d__n_max_x));input_y_clipped=((((_battery_cell1_t_source_switch__out) > (_battery_cell1_capacity_lut_2d__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_capacity_lut_2d__n_min_y))) < (_battery_cell1_capacity_lut_2d__n_max_y) ? (((_battery_cell1_t_source_switch__out) > (_battery_cell1_capacity_lut_2d__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_capacity_lut_2d__n_min_y))) : (_battery_cell1_capacity_lut_2d__n_max_y));real x_addr=(((input_x_clipped + _battery_cell1_capacity_lut_2d__n_input_offset_x)) * _battery_cell1_capacity_lut_2d__n_input_sf_x);down_x=((int) trunc(x_addr));real y_addr=(((input_y_clipped + _battery_cell1_capacity_lut_2d__n_input_offset_y)) * _battery_cell1_capacity_lut_2d__n_input_sf_y);down_y=((int) trunc(y_addr));x_int_coeff=(x_addr - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}y_int_coeff=(y_addr - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}else{real input_x_in=0.0;real input_y_in=0.0;real x_addr_tmp=0.0;real y_addr_tmp=0.0;input_x_in=(((_battery_cell1_soh_set__out + _battery_cell1_capacity_lut_2d__n_input_offset_x)) * _battery_cell1_capacity_lut_2d__n_input_sf_x);x_addr_tmp=floor(input_x_in);if((x_addr_tmp < 0)){down_x=0;}else{if((x_addr_tmp >= (2 - 1))){down_x=((2 - 1) - 1);}else{down_x=((int) x_addr_tmp);}}x_int_coeff=(input_x_in - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}input_y_in=(((_battery_cell1_t_source_switch__out + _battery_cell1_capacity_lut_2d__n_input_offset_y)) * _battery_cell1_capacity_lut_2d__n_input_sf_y);y_addr_tmp=floor(input_y_in);if((y_addr_tmp < 0)){down_y=0;}else{if((y_addr_tmp >= (2 - 1))){down_y=((2 - 1) - 1);}else{down_y=((int) y_addr_tmp);}}y_int_coeff=(input_y_in - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}real data_00=_battery_cell1_capacity_lut_2d__n_z[down_x][down_y];real data_01=_battery_cell1_capacity_lut_2d__n_z[down_x][up_y];real data_10=_battery_cell1_capacity_lut_2d__n_z[up_x][down_y];real data_11=_battery_cell1_capacity_lut_2d__n_z[up_x][up_y];real data_0=(data_00 + (((data_01 - data_00)) * y_int_coeff));real data_1=(data_10 + (((data_11 - data_10)) * y_int_coeff));_battery_cell1_capacity_lut_2d__value=(data_0 + (((data_1 - data_0)) * x_int_coeff));}else{int x_leftIndex=0;int x_rightIndex=0;int x_curAddr=0;real x_fraction=0.0;int y_leftIndex=0;int y_rightIndex=0;int y_curAddr=0;real y_fraction=0.0;if((_battery_cell1_soh_set__out <= _battery_cell1_capacity_lut_2d__n_x[0])){if((1)){x_fraction=0.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_capacity_lut_2d__n_x[0])) / ((_battery_cell1_capacity_lut_2d__n_x[1] - _battery_cell1_capacity_lut_2d__n_x[0])));}x_leftIndex=0;}else{if((_battery_cell1_soh_set__out < _battery_cell1_capacity_lut_2d__n_x[(2 - 1)])){x_curAddr=(((2 - 1)) / 2);x_leftIndex=0;x_rightIndex=(2 - 1);while((1 < (x_rightIndex - x_leftIndex))){if((_battery_cell1_soh_set__out < _battery_cell1_capacity_lut_2d__n_x[x_curAddr])){x_rightIndex=x_curAddr;}else{x_leftIndex=x_curAddr;}x_curAddr=(((x_leftIndex + x_rightIndex)) / 2);}x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_capacity_lut_2d__n_x[x_leftIndex])) / ((_battery_cell1_capacity_lut_2d__n_x[(x_leftIndex + 1)] - _battery_cell1_capacity_lut_2d__n_x[x_leftIndex])));}else{if((1)){x_fraction=1.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_capacity_lut_2d__n_x[(2 - 2)])) / ((_battery_cell1_capacity_lut_2d__n_x[(2 - 1)] - _battery_cell1_capacity_lut_2d__n_x[(2 - 2)])));}x_leftIndex=(2 - 2);}}if((_battery_cell1_t_source_switch__out <= _battery_cell1_capacity_lut_2d__n_y[0])){if((1)){y_fraction=0.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_capacity_lut_2d__n_y[0])) / ((_battery_cell1_capacity_lut_2d__n_y[1] - _battery_cell1_capacity_lut_2d__n_y[0])));}y_leftIndex=0;}else{if((_battery_cell1_t_source_switch__out < _battery_cell1_capacity_lut_2d__n_y[(2 - 1)])){y_curAddr=(((2 - 1)) / 2);y_leftIndex=0;y_rightIndex=(2 - 1);while((1 < (y_rightIndex - y_leftIndex))){if((_battery_cell1_t_source_switch__out < _battery_cell1_capacity_lut_2d__n_y[y_curAddr])){y_rightIndex=y_curAddr;}else{y_leftIndex=y_curAddr;}y_curAddr=(((y_leftIndex + y_rightIndex)) / 2);}y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_capacity_lut_2d__n_y[y_leftIndex])) / ((_battery_cell1_capacity_lut_2d__n_y[(y_leftIndex + 1)] - _battery_cell1_capacity_lut_2d__n_y[y_leftIndex])));}else{if((1)){y_fraction=1.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_capacity_lut_2d__n_y[(2 - 2)])) / ((_battery_cell1_capacity_lut_2d__n_y[(2 - 1)] - _battery_cell1_capacity_lut_2d__n_y[(2 - 2)])));}y_leftIndex=(2 - 2);}}real data_00=_battery_cell1_capacity_lut_2d__n_z[x_leftIndex][y_leftIndex];real data_01=_battery_cell1_capacity_lut_2d__n_z[x_leftIndex][(y_leftIndex + 1)];real data_10=_battery_cell1_capacity_lut_2d__n_z[(x_leftIndex + 1)][y_leftIndex];real data_11=_battery_cell1_capacity_lut_2d__n_z[(x_leftIndex + 1)][(y_leftIndex + 1)];real data_0=(data_00 + (((data_01 - data_00)) * y_fraction));real data_1=(data_10 + (((data_11 - data_10)) * y_fraction));_battery_cell1_capacity_lut_2d__value=(data_0 + (((data_1 - data_0)) * x_fraction));}}
+
+         // Generated from the component: Battery Cell1.Coulombic efficiency.LUT_2D
+            {
+if((0)){int down_x=0;int down_y=0;int up_x=0;int up_y=0;real x_int_coeff=0.0;real y_int_coeff=0.0;if((1)){real input_x_clipped=0.0;real input_y_clipped=0.0;input_x_clipped=((((_battery_cell1_soh_set__out) > (_battery_cell1_coulombic_efficiency_lut_2d__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_coulombic_efficiency_lut_2d__n_min_x))) < (_battery_cell1_coulombic_efficiency_lut_2d__n_max_x) ? (((_battery_cell1_soh_set__out) > (_battery_cell1_coulombic_efficiency_lut_2d__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_coulombic_efficiency_lut_2d__n_min_x))) : (_battery_cell1_coulombic_efficiency_lut_2d__n_max_x));input_y_clipped=((((_battery_cell1_t_source_switch__out) > (_battery_cell1_coulombic_efficiency_lut_2d__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_coulombic_efficiency_lut_2d__n_min_y))) < (_battery_cell1_coulombic_efficiency_lut_2d__n_max_y) ? (((_battery_cell1_t_source_switch__out) > (_battery_cell1_coulombic_efficiency_lut_2d__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_coulombic_efficiency_lut_2d__n_min_y))) : (_battery_cell1_coulombic_efficiency_lut_2d__n_max_y));real x_addr=(((input_x_clipped + _battery_cell1_coulombic_efficiency_lut_2d__n_input_offset_x)) * _battery_cell1_coulombic_efficiency_lut_2d__n_input_sf_x);down_x=((int) trunc(x_addr));real y_addr=(((input_y_clipped + _battery_cell1_coulombic_efficiency_lut_2d__n_input_offset_y)) * _battery_cell1_coulombic_efficiency_lut_2d__n_input_sf_y);down_y=((int) trunc(y_addr));x_int_coeff=(x_addr - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}y_int_coeff=(y_addr - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}else{real input_x_in=0.0;real input_y_in=0.0;real x_addr_tmp=0.0;real y_addr_tmp=0.0;input_x_in=(((_battery_cell1_soh_set__out + _battery_cell1_coulombic_efficiency_lut_2d__n_input_offset_x)) * _battery_cell1_coulombic_efficiency_lut_2d__n_input_sf_x);x_addr_tmp=floor(input_x_in);if((x_addr_tmp < 0)){down_x=0;}else{if((x_addr_tmp >= (2 - 1))){down_x=((2 - 1) - 1);}else{down_x=((int) x_addr_tmp);}}x_int_coeff=(input_x_in - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}input_y_in=(((_battery_cell1_t_source_switch__out + _battery_cell1_coulombic_efficiency_lut_2d__n_input_offset_y)) * _battery_cell1_coulombic_efficiency_lut_2d__n_input_sf_y);y_addr_tmp=floor(input_y_in);if((y_addr_tmp < 0)){down_y=0;}else{if((y_addr_tmp >= (2 - 1))){down_y=((2 - 1) - 1);}else{down_y=((int) y_addr_tmp);}}y_int_coeff=(input_y_in - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}real data_00=_battery_cell1_coulombic_efficiency_lut_2d__n_z[down_x][down_y];real data_01=_battery_cell1_coulombic_efficiency_lut_2d__n_z[down_x][up_y];real data_10=_battery_cell1_coulombic_efficiency_lut_2d__n_z[up_x][down_y];real data_11=_battery_cell1_coulombic_efficiency_lut_2d__n_z[up_x][up_y];real data_0=(data_00 + (((data_01 - data_00)) * y_int_coeff));real data_1=(data_10 + (((data_11 - data_10)) * y_int_coeff));_battery_cell1_coulombic_efficiency_lut_2d__value=(data_0 + (((data_1 - data_0)) * x_int_coeff));}else{int x_leftIndex=0;int x_rightIndex=0;int x_curAddr=0;real x_fraction=0.0;int y_leftIndex=0;int y_rightIndex=0;int y_curAddr=0;real y_fraction=0.0;if((_battery_cell1_soh_set__out <= _battery_cell1_coulombic_efficiency_lut_2d__n_x[0])){if((1)){x_fraction=0.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_coulombic_efficiency_lut_2d__n_x[0])) / ((_battery_cell1_coulombic_efficiency_lut_2d__n_x[1] - _battery_cell1_coulombic_efficiency_lut_2d__n_x[0])));}x_leftIndex=0;}else{if((_battery_cell1_soh_set__out < _battery_cell1_coulombic_efficiency_lut_2d__n_x[(2 - 1)])){x_curAddr=(((2 - 1)) / 2);x_leftIndex=0;x_rightIndex=(2 - 1);while((1 < (x_rightIndex - x_leftIndex))){if((_battery_cell1_soh_set__out < _battery_cell1_coulombic_efficiency_lut_2d__n_x[x_curAddr])){x_rightIndex=x_curAddr;}else{x_leftIndex=x_curAddr;}x_curAddr=(((x_leftIndex + x_rightIndex)) / 2);}x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_coulombic_efficiency_lut_2d__n_x[x_leftIndex])) / ((_battery_cell1_coulombic_efficiency_lut_2d__n_x[(x_leftIndex + 1)] - _battery_cell1_coulombic_efficiency_lut_2d__n_x[x_leftIndex])));}else{if((1)){x_fraction=1.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_coulombic_efficiency_lut_2d__n_x[(2 - 2)])) / ((_battery_cell1_coulombic_efficiency_lut_2d__n_x[(2 - 1)] - _battery_cell1_coulombic_efficiency_lut_2d__n_x[(2 - 2)])));}x_leftIndex=(2 - 2);}}if((_battery_cell1_t_source_switch__out <= _battery_cell1_coulombic_efficiency_lut_2d__n_y[0])){if((1)){y_fraction=0.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_coulombic_efficiency_lut_2d__n_y[0])) / ((_battery_cell1_coulombic_efficiency_lut_2d__n_y[1] - _battery_cell1_coulombic_efficiency_lut_2d__n_y[0])));}y_leftIndex=0;}else{if((_battery_cell1_t_source_switch__out < _battery_cell1_coulombic_efficiency_lut_2d__n_y[(2 - 1)])){y_curAddr=(((2 - 1)) / 2);y_leftIndex=0;y_rightIndex=(2 - 1);while((1 < (y_rightIndex - y_leftIndex))){if((_battery_cell1_t_source_switch__out < _battery_cell1_coulombic_efficiency_lut_2d__n_y[y_curAddr])){y_rightIndex=y_curAddr;}else{y_leftIndex=y_curAddr;}y_curAddr=(((y_leftIndex + y_rightIndex)) / 2);}y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_coulombic_efficiency_lut_2d__n_y[y_leftIndex])) / ((_battery_cell1_coulombic_efficiency_lut_2d__n_y[(y_leftIndex + 1)] - _battery_cell1_coulombic_efficiency_lut_2d__n_y[y_leftIndex])));}else{if((1)){y_fraction=1.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_coulombic_efficiency_lut_2d__n_y[(2 - 2)])) / ((_battery_cell1_coulombic_efficiency_lut_2d__n_y[(2 - 1)] - _battery_cell1_coulombic_efficiency_lut_2d__n_y[(2 - 2)])));}y_leftIndex=(2 - 2);}}real data_00=_battery_cell1_coulombic_efficiency_lut_2d__n_z[x_leftIndex][y_leftIndex];real data_01=_battery_cell1_coulombic_efficiency_lut_2d__n_z[x_leftIndex][(y_leftIndex + 1)];real data_10=_battery_cell1_coulombic_efficiency_lut_2d__n_z[(x_leftIndex + 1)][y_leftIndex];real data_11=_battery_cell1_coulombic_efficiency_lut_2d__n_z[(x_leftIndex + 1)][(y_leftIndex + 1)];real data_0=(data_00 + (((data_01 - data_00)) * y_fraction));real data_1=(data_10 + (((data_11 - data_10)) * y_fraction));_battery_cell1_coulombic_efficiency_lut_2d__value=(data_0 + (((data_1 - data_0)) * x_fraction));}}
+
+         // Generated from the component: Battery Cell1.Hysteresis.Termination4
+            {
+}
+
+         // Generated from the component: Battery Cell1.Internal Resistance.LUT_2D
+            {
+if((0)){int down_x=0;int down_y=0;int up_x=0;int up_y=0;real x_int_coeff=0.0;real y_int_coeff=0.0;if((1)){real input_x_clipped=0.0;real input_y_clipped=0.0;input_x_clipped=((((_battery_cell1_soh_set__out) > (_battery_cell1_internal_resistance_lut_2d__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_internal_resistance_lut_2d__n_min_x))) < (_battery_cell1_internal_resistance_lut_2d__n_max_x) ? (((_battery_cell1_soh_set__out) > (_battery_cell1_internal_resistance_lut_2d__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_internal_resistance_lut_2d__n_min_x))) : (_battery_cell1_internal_resistance_lut_2d__n_max_x));input_y_clipped=((((_battery_cell1_t_source_switch__out) > (_battery_cell1_internal_resistance_lut_2d__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_internal_resistance_lut_2d__n_min_y))) < (_battery_cell1_internal_resistance_lut_2d__n_max_y) ? (((_battery_cell1_t_source_switch__out) > (_battery_cell1_internal_resistance_lut_2d__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_internal_resistance_lut_2d__n_min_y))) : (_battery_cell1_internal_resistance_lut_2d__n_max_y));real x_addr=(((input_x_clipped + _battery_cell1_internal_resistance_lut_2d__n_input_offset_x)) * _battery_cell1_internal_resistance_lut_2d__n_input_sf_x);down_x=((int) trunc(x_addr));real y_addr=(((input_y_clipped + _battery_cell1_internal_resistance_lut_2d__n_input_offset_y)) * _battery_cell1_internal_resistance_lut_2d__n_input_sf_y);down_y=((int) trunc(y_addr));x_int_coeff=(x_addr - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}y_int_coeff=(y_addr - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}else{real input_x_in=0.0;real input_y_in=0.0;real x_addr_tmp=0.0;real y_addr_tmp=0.0;input_x_in=(((_battery_cell1_soh_set__out + _battery_cell1_internal_resistance_lut_2d__n_input_offset_x)) * _battery_cell1_internal_resistance_lut_2d__n_input_sf_x);x_addr_tmp=floor(input_x_in);if((x_addr_tmp < 0)){down_x=0;}else{if((x_addr_tmp >= (2 - 1))){down_x=((2 - 1) - 1);}else{down_x=((int) x_addr_tmp);}}x_int_coeff=(input_x_in - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}input_y_in=(((_battery_cell1_t_source_switch__out + _battery_cell1_internal_resistance_lut_2d__n_input_offset_y)) * _battery_cell1_internal_resistance_lut_2d__n_input_sf_y);y_addr_tmp=floor(input_y_in);if((y_addr_tmp < 0)){down_y=0;}else{if((y_addr_tmp >= (2 - 1))){down_y=((2 - 1) - 1);}else{down_y=((int) y_addr_tmp);}}y_int_coeff=(input_y_in - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}real data_00=_battery_cell1_internal_resistance_lut_2d__n_z[down_x][down_y];real data_01=_battery_cell1_internal_resistance_lut_2d__n_z[down_x][up_y];real data_10=_battery_cell1_internal_resistance_lut_2d__n_z[up_x][down_y];real data_11=_battery_cell1_internal_resistance_lut_2d__n_z[up_x][up_y];real data_0=(data_00 + (((data_01 - data_00)) * y_int_coeff));real data_1=(data_10 + (((data_11 - data_10)) * y_int_coeff));_battery_cell1_internal_resistance_lut_2d__value=(data_0 + (((data_1 - data_0)) * x_int_coeff));}else{int x_leftIndex=0;int x_rightIndex=0;int x_curAddr=0;real x_fraction=0.0;int y_leftIndex=0;int y_rightIndex=0;int y_curAddr=0;real y_fraction=0.0;if((_battery_cell1_soh_set__out <= _battery_cell1_internal_resistance_lut_2d__n_x[0])){if((1)){x_fraction=0.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_internal_resistance_lut_2d__n_x[0])) / ((_battery_cell1_internal_resistance_lut_2d__n_x[1] - _battery_cell1_internal_resistance_lut_2d__n_x[0])));}x_leftIndex=0;}else{if((_battery_cell1_soh_set__out < _battery_cell1_internal_resistance_lut_2d__n_x[(2 - 1)])){x_curAddr=(((2 - 1)) / 2);x_leftIndex=0;x_rightIndex=(2 - 1);while((1 < (x_rightIndex - x_leftIndex))){if((_battery_cell1_soh_set__out < _battery_cell1_internal_resistance_lut_2d__n_x[x_curAddr])){x_rightIndex=x_curAddr;}else{x_leftIndex=x_curAddr;}x_curAddr=(((x_leftIndex + x_rightIndex)) / 2);}x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_internal_resistance_lut_2d__n_x[x_leftIndex])) / ((_battery_cell1_internal_resistance_lut_2d__n_x[(x_leftIndex + 1)] - _battery_cell1_internal_resistance_lut_2d__n_x[x_leftIndex])));}else{if((1)){x_fraction=1.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_internal_resistance_lut_2d__n_x[(2 - 2)])) / ((_battery_cell1_internal_resistance_lut_2d__n_x[(2 - 1)] - _battery_cell1_internal_resistance_lut_2d__n_x[(2 - 2)])));}x_leftIndex=(2 - 2);}}if((_battery_cell1_t_source_switch__out <= _battery_cell1_internal_resistance_lut_2d__n_y[0])){if((1)){y_fraction=0.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_internal_resistance_lut_2d__n_y[0])) / ((_battery_cell1_internal_resistance_lut_2d__n_y[1] - _battery_cell1_internal_resistance_lut_2d__n_y[0])));}y_leftIndex=0;}else{if((_battery_cell1_t_source_switch__out < _battery_cell1_internal_resistance_lut_2d__n_y[(2 - 1)])){y_curAddr=(((2 - 1)) / 2);y_leftIndex=0;y_rightIndex=(2 - 1);while((1 < (y_rightIndex - y_leftIndex))){if((_battery_cell1_t_source_switch__out < _battery_cell1_internal_resistance_lut_2d__n_y[y_curAddr])){y_rightIndex=y_curAddr;}else{y_leftIndex=y_curAddr;}y_curAddr=(((y_leftIndex + y_rightIndex)) / 2);}y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_internal_resistance_lut_2d__n_y[y_leftIndex])) / ((_battery_cell1_internal_resistance_lut_2d__n_y[(y_leftIndex + 1)] - _battery_cell1_internal_resistance_lut_2d__n_y[y_leftIndex])));}else{if((1)){y_fraction=1.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_internal_resistance_lut_2d__n_y[(2 - 2)])) / ((_battery_cell1_internal_resistance_lut_2d__n_y[(2 - 1)] - _battery_cell1_internal_resistance_lut_2d__n_y[(2 - 2)])));}y_leftIndex=(2 - 2);}}real data_00=_battery_cell1_internal_resistance_lut_2d__n_z[x_leftIndex][y_leftIndex];real data_01=_battery_cell1_internal_resistance_lut_2d__n_z[x_leftIndex][(y_leftIndex + 1)];real data_10=_battery_cell1_internal_resistance_lut_2d__n_z[(x_leftIndex + 1)][y_leftIndex];real data_11=_battery_cell1_internal_resistance_lut_2d__n_z[(x_leftIndex + 1)][(y_leftIndex + 1)];real data_0=(data_00 + (((data_01 - data_00)) * y_fraction));real data_1=(data_10 + (((data_11 - data_10)) * y_fraction));_battery_cell1_internal_resistance_lut_2d__value=(data_0 + (((data_1 - data_0)) * x_fraction));}}
+
+         // Generated from the component: Battery Cell1.Parallel RC.LUT_2D_C1
+            {
+if((1)){int down_x=0;int down_y=0;int up_x=0;int up_y=0;real x_int_coeff=0.0;real y_int_coeff=0.0;if((1)){real input_x_clipped=0.0;real input_y_clipped=0.0;input_x_clipped=((((_battery_cell1_soh_set__out) > (_battery_cell1_parallel_rc_lut_2d_c1__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_parallel_rc_lut_2d_c1__n_min_x))) < (_battery_cell1_parallel_rc_lut_2d_c1__n_max_x) ? (((_battery_cell1_soh_set__out) > (_battery_cell1_parallel_rc_lut_2d_c1__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_parallel_rc_lut_2d_c1__n_min_x))) : (_battery_cell1_parallel_rc_lut_2d_c1__n_max_x));input_y_clipped=((((_battery_cell1_t_source_switch__out) > (_battery_cell1_parallel_rc_lut_2d_c1__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_parallel_rc_lut_2d_c1__n_min_y))) < (_battery_cell1_parallel_rc_lut_2d_c1__n_max_y) ? (((_battery_cell1_t_source_switch__out) > (_battery_cell1_parallel_rc_lut_2d_c1__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_parallel_rc_lut_2d_c1__n_min_y))) : (_battery_cell1_parallel_rc_lut_2d_c1__n_max_y));real x_addr=(((input_x_clipped + _battery_cell1_parallel_rc_lut_2d_c1__n_input_offset_x)) * _battery_cell1_parallel_rc_lut_2d_c1__n_input_sf_x);down_x=((int) trunc(x_addr));real y_addr=(((input_y_clipped + _battery_cell1_parallel_rc_lut_2d_c1__n_input_offset_y)) * _battery_cell1_parallel_rc_lut_2d_c1__n_input_sf_y);down_y=((int) trunc(y_addr));x_int_coeff=(x_addr - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}y_int_coeff=(y_addr - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}else{real input_x_in=0.0;real input_y_in=0.0;real x_addr_tmp=0.0;real y_addr_tmp=0.0;input_x_in=(((_battery_cell1_soh_set__out + _battery_cell1_parallel_rc_lut_2d_c1__n_input_offset_x)) * _battery_cell1_parallel_rc_lut_2d_c1__n_input_sf_x);x_addr_tmp=floor(input_x_in);if((x_addr_tmp < 0)){down_x=0;}else{if((x_addr_tmp >= (2 - 1))){down_x=((2 - 1) - 1);}else{down_x=((int) x_addr_tmp);}}x_int_coeff=(input_x_in - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}input_y_in=(((_battery_cell1_t_source_switch__out + _battery_cell1_parallel_rc_lut_2d_c1__n_input_offset_y)) * _battery_cell1_parallel_rc_lut_2d_c1__n_input_sf_y);y_addr_tmp=floor(input_y_in);if((y_addr_tmp < 0)){down_y=0;}else{if((y_addr_tmp >= (2 - 1))){down_y=((2 - 1) - 1);}else{down_y=((int) y_addr_tmp);}}y_int_coeff=(input_y_in - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}real data_00=_battery_cell1_parallel_rc_lut_2d_c1__n_z[down_x][down_y];real data_01=_battery_cell1_parallel_rc_lut_2d_c1__n_z[down_x][up_y];real data_10=_battery_cell1_parallel_rc_lut_2d_c1__n_z[up_x][down_y];real data_11=_battery_cell1_parallel_rc_lut_2d_c1__n_z[up_x][up_y];real data_0=(data_00 + (((data_01 - data_00)) * y_int_coeff));real data_1=(data_10 + (((data_11 - data_10)) * y_int_coeff));_battery_cell1_parallel_rc_lut_2d_c1__value=(data_0 + (((data_1 - data_0)) * x_int_coeff));}else{int x_leftIndex=0;int x_rightIndex=0;int x_curAddr=0;real x_fraction=0.0;int y_leftIndex=0;int y_rightIndex=0;int y_curAddr=0;real y_fraction=0.0;if((_battery_cell1_soh_set__out <= _battery_cell1_parallel_rc_lut_2d_c1__n_x[0])){if((1)){x_fraction=0.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_parallel_rc_lut_2d_c1__n_x[0])) / ((_battery_cell1_parallel_rc_lut_2d_c1__n_x[1] - _battery_cell1_parallel_rc_lut_2d_c1__n_x[0])));}x_leftIndex=0;}else{if((_battery_cell1_soh_set__out < _battery_cell1_parallel_rc_lut_2d_c1__n_x[(2 - 1)])){x_curAddr=(((2 - 1)) / 2);x_leftIndex=0;x_rightIndex=(2 - 1);while((1 < (x_rightIndex - x_leftIndex))){if((_battery_cell1_soh_set__out < _battery_cell1_parallel_rc_lut_2d_c1__n_x[x_curAddr])){x_rightIndex=x_curAddr;}else{x_leftIndex=x_curAddr;}x_curAddr=(((x_leftIndex + x_rightIndex)) / 2);}x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_parallel_rc_lut_2d_c1__n_x[x_leftIndex])) / ((_battery_cell1_parallel_rc_lut_2d_c1__n_x[(x_leftIndex + 1)] - _battery_cell1_parallel_rc_lut_2d_c1__n_x[x_leftIndex])));}else{if((1)){x_fraction=1.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_parallel_rc_lut_2d_c1__n_x[(2 - 2)])) / ((_battery_cell1_parallel_rc_lut_2d_c1__n_x[(2 - 1)] - _battery_cell1_parallel_rc_lut_2d_c1__n_x[(2 - 2)])));}x_leftIndex=(2 - 2);}}if((_battery_cell1_t_source_switch__out <= _battery_cell1_parallel_rc_lut_2d_c1__n_y[0])){if((1)){y_fraction=0.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_parallel_rc_lut_2d_c1__n_y[0])) / ((_battery_cell1_parallel_rc_lut_2d_c1__n_y[1] - _battery_cell1_parallel_rc_lut_2d_c1__n_y[0])));}y_leftIndex=0;}else{if((_battery_cell1_t_source_switch__out < _battery_cell1_parallel_rc_lut_2d_c1__n_y[(2 - 1)])){y_curAddr=(((2 - 1)) / 2);y_leftIndex=0;y_rightIndex=(2 - 1);while((1 < (y_rightIndex - y_leftIndex))){if((_battery_cell1_t_source_switch__out < _battery_cell1_parallel_rc_lut_2d_c1__n_y[y_curAddr])){y_rightIndex=y_curAddr;}else{y_leftIndex=y_curAddr;}y_curAddr=(((y_leftIndex + y_rightIndex)) / 2);}y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_parallel_rc_lut_2d_c1__n_y[y_leftIndex])) / ((_battery_cell1_parallel_rc_lut_2d_c1__n_y[(y_leftIndex + 1)] - _battery_cell1_parallel_rc_lut_2d_c1__n_y[y_leftIndex])));}else{if((1)){y_fraction=1.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_parallel_rc_lut_2d_c1__n_y[(2 - 2)])) / ((_battery_cell1_parallel_rc_lut_2d_c1__n_y[(2 - 1)] - _battery_cell1_parallel_rc_lut_2d_c1__n_y[(2 - 2)])));}y_leftIndex=(2 - 2);}}real data_00=_battery_cell1_parallel_rc_lut_2d_c1__n_z[x_leftIndex][y_leftIndex];real data_01=_battery_cell1_parallel_rc_lut_2d_c1__n_z[x_leftIndex][(y_leftIndex + 1)];real data_10=_battery_cell1_parallel_rc_lut_2d_c1__n_z[(x_leftIndex + 1)][y_leftIndex];real data_11=_battery_cell1_parallel_rc_lut_2d_c1__n_z[(x_leftIndex + 1)][(y_leftIndex + 1)];real data_0=(data_00 + (((data_01 - data_00)) * y_fraction));real data_1=(data_10 + (((data_11 - data_10)) * y_fraction));_battery_cell1_parallel_rc_lut_2d_c1__value=(data_0 + (((data_1 - data_0)) * x_fraction));}}
+
+         // Generated from the component: Battery Cell1.Parallel RC.LUT_2D_C2
+            {
+if((1)){int down_x=0;int down_y=0;int up_x=0;int up_y=0;real x_int_coeff=0.0;real y_int_coeff=0.0;if((1)){real input_x_clipped=0.0;real input_y_clipped=0.0;input_x_clipped=((((_battery_cell1_soh_set__out) > (_battery_cell1_parallel_rc_lut_2d_c2__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_parallel_rc_lut_2d_c2__n_min_x))) < (_battery_cell1_parallel_rc_lut_2d_c2__n_max_x) ? (((_battery_cell1_soh_set__out) > (_battery_cell1_parallel_rc_lut_2d_c2__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_parallel_rc_lut_2d_c2__n_min_x))) : (_battery_cell1_parallel_rc_lut_2d_c2__n_max_x));input_y_clipped=((((_battery_cell1_t_source_switch__out) > (_battery_cell1_parallel_rc_lut_2d_c2__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_parallel_rc_lut_2d_c2__n_min_y))) < (_battery_cell1_parallel_rc_lut_2d_c2__n_max_y) ? (((_battery_cell1_t_source_switch__out) > (_battery_cell1_parallel_rc_lut_2d_c2__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_parallel_rc_lut_2d_c2__n_min_y))) : (_battery_cell1_parallel_rc_lut_2d_c2__n_max_y));real x_addr=(((input_x_clipped + _battery_cell1_parallel_rc_lut_2d_c2__n_input_offset_x)) * _battery_cell1_parallel_rc_lut_2d_c2__n_input_sf_x);down_x=((int) trunc(x_addr));real y_addr=(((input_y_clipped + _battery_cell1_parallel_rc_lut_2d_c2__n_input_offset_y)) * _battery_cell1_parallel_rc_lut_2d_c2__n_input_sf_y);down_y=((int) trunc(y_addr));x_int_coeff=(x_addr - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}y_int_coeff=(y_addr - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}else{real input_x_in=0.0;real input_y_in=0.0;real x_addr_tmp=0.0;real y_addr_tmp=0.0;input_x_in=(((_battery_cell1_soh_set__out + _battery_cell1_parallel_rc_lut_2d_c2__n_input_offset_x)) * _battery_cell1_parallel_rc_lut_2d_c2__n_input_sf_x);x_addr_tmp=floor(input_x_in);if((x_addr_tmp < 0)){down_x=0;}else{if((x_addr_tmp >= (2 - 1))){down_x=((2 - 1) - 1);}else{down_x=((int) x_addr_tmp);}}x_int_coeff=(input_x_in - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}input_y_in=(((_battery_cell1_t_source_switch__out + _battery_cell1_parallel_rc_lut_2d_c2__n_input_offset_y)) * _battery_cell1_parallel_rc_lut_2d_c2__n_input_sf_y);y_addr_tmp=floor(input_y_in);if((y_addr_tmp < 0)){down_y=0;}else{if((y_addr_tmp >= (2 - 1))){down_y=((2 - 1) - 1);}else{down_y=((int) y_addr_tmp);}}y_int_coeff=(input_y_in - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}real data_00=_battery_cell1_parallel_rc_lut_2d_c2__n_z[down_x][down_y];real data_01=_battery_cell1_parallel_rc_lut_2d_c2__n_z[down_x][up_y];real data_10=_battery_cell1_parallel_rc_lut_2d_c2__n_z[up_x][down_y];real data_11=_battery_cell1_parallel_rc_lut_2d_c2__n_z[up_x][up_y];real data_0=(data_00 + (((data_01 - data_00)) * y_int_coeff));real data_1=(data_10 + (((data_11 - data_10)) * y_int_coeff));_battery_cell1_parallel_rc_lut_2d_c2__value=(data_0 + (((data_1 - data_0)) * x_int_coeff));}else{int x_leftIndex=0;int x_rightIndex=0;int x_curAddr=0;real x_fraction=0.0;int y_leftIndex=0;int y_rightIndex=0;int y_curAddr=0;real y_fraction=0.0;if((_battery_cell1_soh_set__out <= _battery_cell1_parallel_rc_lut_2d_c2__n_x[0])){if((1)){x_fraction=0.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_parallel_rc_lut_2d_c2__n_x[0])) / ((_battery_cell1_parallel_rc_lut_2d_c2__n_x[1] - _battery_cell1_parallel_rc_lut_2d_c2__n_x[0])));}x_leftIndex=0;}else{if((_battery_cell1_soh_set__out < _battery_cell1_parallel_rc_lut_2d_c2__n_x[(2 - 1)])){x_curAddr=(((2 - 1)) / 2);x_leftIndex=0;x_rightIndex=(2 - 1);while((1 < (x_rightIndex - x_leftIndex))){if((_battery_cell1_soh_set__out < _battery_cell1_parallel_rc_lut_2d_c2__n_x[x_curAddr])){x_rightIndex=x_curAddr;}else{x_leftIndex=x_curAddr;}x_curAddr=(((x_leftIndex + x_rightIndex)) / 2);}x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_parallel_rc_lut_2d_c2__n_x[x_leftIndex])) / ((_battery_cell1_parallel_rc_lut_2d_c2__n_x[(x_leftIndex + 1)] - _battery_cell1_parallel_rc_lut_2d_c2__n_x[x_leftIndex])));}else{if((1)){x_fraction=1.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_parallel_rc_lut_2d_c2__n_x[(2 - 2)])) / ((_battery_cell1_parallel_rc_lut_2d_c2__n_x[(2 - 1)] - _battery_cell1_parallel_rc_lut_2d_c2__n_x[(2 - 2)])));}x_leftIndex=(2 - 2);}}if((_battery_cell1_t_source_switch__out <= _battery_cell1_parallel_rc_lut_2d_c2__n_y[0])){if((1)){y_fraction=0.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_parallel_rc_lut_2d_c2__n_y[0])) / ((_battery_cell1_parallel_rc_lut_2d_c2__n_y[1] - _battery_cell1_parallel_rc_lut_2d_c2__n_y[0])));}y_leftIndex=0;}else{if((_battery_cell1_t_source_switch__out < _battery_cell1_parallel_rc_lut_2d_c2__n_y[(2 - 1)])){y_curAddr=(((2 - 1)) / 2);y_leftIndex=0;y_rightIndex=(2 - 1);while((1 < (y_rightIndex - y_leftIndex))){if((_battery_cell1_t_source_switch__out < _battery_cell1_parallel_rc_lut_2d_c2__n_y[y_curAddr])){y_rightIndex=y_curAddr;}else{y_leftIndex=y_curAddr;}y_curAddr=(((y_leftIndex + y_rightIndex)) / 2);}y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_parallel_rc_lut_2d_c2__n_y[y_leftIndex])) / ((_battery_cell1_parallel_rc_lut_2d_c2__n_y[(y_leftIndex + 1)] - _battery_cell1_parallel_rc_lut_2d_c2__n_y[y_leftIndex])));}else{if((1)){y_fraction=1.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_parallel_rc_lut_2d_c2__n_y[(2 - 2)])) / ((_battery_cell1_parallel_rc_lut_2d_c2__n_y[(2 - 1)] - _battery_cell1_parallel_rc_lut_2d_c2__n_y[(2 - 2)])));}y_leftIndex=(2 - 2);}}real data_00=_battery_cell1_parallel_rc_lut_2d_c2__n_z[x_leftIndex][y_leftIndex];real data_01=_battery_cell1_parallel_rc_lut_2d_c2__n_z[x_leftIndex][(y_leftIndex + 1)];real data_10=_battery_cell1_parallel_rc_lut_2d_c2__n_z[(x_leftIndex + 1)][y_leftIndex];real data_11=_battery_cell1_parallel_rc_lut_2d_c2__n_z[(x_leftIndex + 1)][(y_leftIndex + 1)];real data_0=(data_00 + (((data_01 - data_00)) * y_fraction));real data_1=(data_10 + (((data_11 - data_10)) * y_fraction));_battery_cell1_parallel_rc_lut_2d_c2__value=(data_0 + (((data_1 - data_0)) * x_fraction));}}
+
+         // Generated from the component: Battery Cell1.Parallel RC.LUT_2D_R1
+            {
+if((1)){int down_x=0;int down_y=0;int up_x=0;int up_y=0;real x_int_coeff=0.0;real y_int_coeff=0.0;if((1)){real input_x_clipped=0.0;real input_y_clipped=0.0;input_x_clipped=((((_battery_cell1_soh_set__out) > (_battery_cell1_parallel_rc_lut_2d_r1__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_parallel_rc_lut_2d_r1__n_min_x))) < (_battery_cell1_parallel_rc_lut_2d_r1__n_max_x) ? (((_battery_cell1_soh_set__out) > (_battery_cell1_parallel_rc_lut_2d_r1__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_parallel_rc_lut_2d_r1__n_min_x))) : (_battery_cell1_parallel_rc_lut_2d_r1__n_max_x));input_y_clipped=((((_battery_cell1_t_source_switch__out) > (_battery_cell1_parallel_rc_lut_2d_r1__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_parallel_rc_lut_2d_r1__n_min_y))) < (_battery_cell1_parallel_rc_lut_2d_r1__n_max_y) ? (((_battery_cell1_t_source_switch__out) > (_battery_cell1_parallel_rc_lut_2d_r1__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_parallel_rc_lut_2d_r1__n_min_y))) : (_battery_cell1_parallel_rc_lut_2d_r1__n_max_y));real x_addr=(((input_x_clipped + _battery_cell1_parallel_rc_lut_2d_r1__n_input_offset_x)) * _battery_cell1_parallel_rc_lut_2d_r1__n_input_sf_x);down_x=((int) trunc(x_addr));real y_addr=(((input_y_clipped + _battery_cell1_parallel_rc_lut_2d_r1__n_input_offset_y)) * _battery_cell1_parallel_rc_lut_2d_r1__n_input_sf_y);down_y=((int) trunc(y_addr));x_int_coeff=(x_addr - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}y_int_coeff=(y_addr - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}else{real input_x_in=0.0;real input_y_in=0.0;real x_addr_tmp=0.0;real y_addr_tmp=0.0;input_x_in=(((_battery_cell1_soh_set__out + _battery_cell1_parallel_rc_lut_2d_r1__n_input_offset_x)) * _battery_cell1_parallel_rc_lut_2d_r1__n_input_sf_x);x_addr_tmp=floor(input_x_in);if((x_addr_tmp < 0)){down_x=0;}else{if((x_addr_tmp >= (2 - 1))){down_x=((2 - 1) - 1);}else{down_x=((int) x_addr_tmp);}}x_int_coeff=(input_x_in - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}input_y_in=(((_battery_cell1_t_source_switch__out + _battery_cell1_parallel_rc_lut_2d_r1__n_input_offset_y)) * _battery_cell1_parallel_rc_lut_2d_r1__n_input_sf_y);y_addr_tmp=floor(input_y_in);if((y_addr_tmp < 0)){down_y=0;}else{if((y_addr_tmp >= (2 - 1))){down_y=((2 - 1) - 1);}else{down_y=((int) y_addr_tmp);}}y_int_coeff=(input_y_in - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}real data_00=_battery_cell1_parallel_rc_lut_2d_r1__n_z[down_x][down_y];real data_01=_battery_cell1_parallel_rc_lut_2d_r1__n_z[down_x][up_y];real data_10=_battery_cell1_parallel_rc_lut_2d_r1__n_z[up_x][down_y];real data_11=_battery_cell1_parallel_rc_lut_2d_r1__n_z[up_x][up_y];real data_0=(data_00 + (((data_01 - data_00)) * y_int_coeff));real data_1=(data_10 + (((data_11 - data_10)) * y_int_coeff));_battery_cell1_parallel_rc_lut_2d_r1__value=(data_0 + (((data_1 - data_0)) * x_int_coeff));}else{int x_leftIndex=0;int x_rightIndex=0;int x_curAddr=0;real x_fraction=0.0;int y_leftIndex=0;int y_rightIndex=0;int y_curAddr=0;real y_fraction=0.0;if((_battery_cell1_soh_set__out <= _battery_cell1_parallel_rc_lut_2d_r1__n_x[0])){if((1)){x_fraction=0.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_parallel_rc_lut_2d_r1__n_x[0])) / ((_battery_cell1_parallel_rc_lut_2d_r1__n_x[1] - _battery_cell1_parallel_rc_lut_2d_r1__n_x[0])));}x_leftIndex=0;}else{if((_battery_cell1_soh_set__out < _battery_cell1_parallel_rc_lut_2d_r1__n_x[(2 - 1)])){x_curAddr=(((2 - 1)) / 2);x_leftIndex=0;x_rightIndex=(2 - 1);while((1 < (x_rightIndex - x_leftIndex))){if((_battery_cell1_soh_set__out < _battery_cell1_parallel_rc_lut_2d_r1__n_x[x_curAddr])){x_rightIndex=x_curAddr;}else{x_leftIndex=x_curAddr;}x_curAddr=(((x_leftIndex + x_rightIndex)) / 2);}x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_parallel_rc_lut_2d_r1__n_x[x_leftIndex])) / ((_battery_cell1_parallel_rc_lut_2d_r1__n_x[(x_leftIndex + 1)] - _battery_cell1_parallel_rc_lut_2d_r1__n_x[x_leftIndex])));}else{if((1)){x_fraction=1.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_parallel_rc_lut_2d_r1__n_x[(2 - 2)])) / ((_battery_cell1_parallel_rc_lut_2d_r1__n_x[(2 - 1)] - _battery_cell1_parallel_rc_lut_2d_r1__n_x[(2 - 2)])));}x_leftIndex=(2 - 2);}}if((_battery_cell1_t_source_switch__out <= _battery_cell1_parallel_rc_lut_2d_r1__n_y[0])){if((1)){y_fraction=0.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_parallel_rc_lut_2d_r1__n_y[0])) / ((_battery_cell1_parallel_rc_lut_2d_r1__n_y[1] - _battery_cell1_parallel_rc_lut_2d_r1__n_y[0])));}y_leftIndex=0;}else{if((_battery_cell1_t_source_switch__out < _battery_cell1_parallel_rc_lut_2d_r1__n_y[(2 - 1)])){y_curAddr=(((2 - 1)) / 2);y_leftIndex=0;y_rightIndex=(2 - 1);while((1 < (y_rightIndex - y_leftIndex))){if((_battery_cell1_t_source_switch__out < _battery_cell1_parallel_rc_lut_2d_r1__n_y[y_curAddr])){y_rightIndex=y_curAddr;}else{y_leftIndex=y_curAddr;}y_curAddr=(((y_leftIndex + y_rightIndex)) / 2);}y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_parallel_rc_lut_2d_r1__n_y[y_leftIndex])) / ((_battery_cell1_parallel_rc_lut_2d_r1__n_y[(y_leftIndex + 1)] - _battery_cell1_parallel_rc_lut_2d_r1__n_y[y_leftIndex])));}else{if((1)){y_fraction=1.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_parallel_rc_lut_2d_r1__n_y[(2 - 2)])) / ((_battery_cell1_parallel_rc_lut_2d_r1__n_y[(2 - 1)] - _battery_cell1_parallel_rc_lut_2d_r1__n_y[(2 - 2)])));}y_leftIndex=(2 - 2);}}real data_00=_battery_cell1_parallel_rc_lut_2d_r1__n_z[x_leftIndex][y_leftIndex];real data_01=_battery_cell1_parallel_rc_lut_2d_r1__n_z[x_leftIndex][(y_leftIndex + 1)];real data_10=_battery_cell1_parallel_rc_lut_2d_r1__n_z[(x_leftIndex + 1)][y_leftIndex];real data_11=_battery_cell1_parallel_rc_lut_2d_r1__n_z[(x_leftIndex + 1)][(y_leftIndex + 1)];real data_0=(data_00 + (((data_01 - data_00)) * y_fraction));real data_1=(data_10 + (((data_11 - data_10)) * y_fraction));_battery_cell1_parallel_rc_lut_2d_r1__value=(data_0 + (((data_1 - data_0)) * x_fraction));}}
+
+         // Generated from the component: Battery Cell1.Parallel RC.LUT_2D_R2
+            {
+if((1)){int down_x=0;int down_y=0;int up_x=0;int up_y=0;real x_int_coeff=0.0;real y_int_coeff=0.0;if((1)){real input_x_clipped=0.0;real input_y_clipped=0.0;input_x_clipped=((((_battery_cell1_soh_set__out) > (_battery_cell1_parallel_rc_lut_2d_r2__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_parallel_rc_lut_2d_r2__n_min_x))) < (_battery_cell1_parallel_rc_lut_2d_r2__n_max_x) ? (((_battery_cell1_soh_set__out) > (_battery_cell1_parallel_rc_lut_2d_r2__n_min_x) ? (_battery_cell1_soh_set__out) : (_battery_cell1_parallel_rc_lut_2d_r2__n_min_x))) : (_battery_cell1_parallel_rc_lut_2d_r2__n_max_x));input_y_clipped=((((_battery_cell1_t_source_switch__out) > (_battery_cell1_parallel_rc_lut_2d_r2__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_parallel_rc_lut_2d_r2__n_min_y))) < (_battery_cell1_parallel_rc_lut_2d_r2__n_max_y) ? (((_battery_cell1_t_source_switch__out) > (_battery_cell1_parallel_rc_lut_2d_r2__n_min_y) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_parallel_rc_lut_2d_r2__n_min_y))) : (_battery_cell1_parallel_rc_lut_2d_r2__n_max_y));real x_addr=(((input_x_clipped + _battery_cell1_parallel_rc_lut_2d_r2__n_input_offset_x)) * _battery_cell1_parallel_rc_lut_2d_r2__n_input_sf_x);down_x=((int) trunc(x_addr));real y_addr=(((input_y_clipped + _battery_cell1_parallel_rc_lut_2d_r2__n_input_offset_y)) * _battery_cell1_parallel_rc_lut_2d_r2__n_input_sf_y);down_y=((int) trunc(y_addr));x_int_coeff=(x_addr - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}y_int_coeff=(y_addr - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}else{real input_x_in=0.0;real input_y_in=0.0;real x_addr_tmp=0.0;real y_addr_tmp=0.0;input_x_in=(((_battery_cell1_soh_set__out + _battery_cell1_parallel_rc_lut_2d_r2__n_input_offset_x)) * _battery_cell1_parallel_rc_lut_2d_r2__n_input_sf_x);x_addr_tmp=floor(input_x_in);if((x_addr_tmp < 0)){down_x=0;}else{if((x_addr_tmp >= (2 - 1))){down_x=((2 - 1) - 1);}else{down_x=((int) x_addr_tmp);}}x_int_coeff=(input_x_in - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}input_y_in=(((_battery_cell1_t_source_switch__out + _battery_cell1_parallel_rc_lut_2d_r2__n_input_offset_y)) * _battery_cell1_parallel_rc_lut_2d_r2__n_input_sf_y);y_addr_tmp=floor(input_y_in);if((y_addr_tmp < 0)){down_y=0;}else{if((y_addr_tmp >= (2 - 1))){down_y=((2 - 1) - 1);}else{down_y=((int) y_addr_tmp);}}y_int_coeff=(input_y_in - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}real data_00=_battery_cell1_parallel_rc_lut_2d_r2__n_z[down_x][down_y];real data_01=_battery_cell1_parallel_rc_lut_2d_r2__n_z[down_x][up_y];real data_10=_battery_cell1_parallel_rc_lut_2d_r2__n_z[up_x][down_y];real data_11=_battery_cell1_parallel_rc_lut_2d_r2__n_z[up_x][up_y];real data_0=(data_00 + (((data_01 - data_00)) * y_int_coeff));real data_1=(data_10 + (((data_11 - data_10)) * y_int_coeff));_battery_cell1_parallel_rc_lut_2d_r2__value=(data_0 + (((data_1 - data_0)) * x_int_coeff));}else{int x_leftIndex=0;int x_rightIndex=0;int x_curAddr=0;real x_fraction=0.0;int y_leftIndex=0;int y_rightIndex=0;int y_curAddr=0;real y_fraction=0.0;if((_battery_cell1_soh_set__out <= _battery_cell1_parallel_rc_lut_2d_r2__n_x[0])){if((1)){x_fraction=0.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_parallel_rc_lut_2d_r2__n_x[0])) / ((_battery_cell1_parallel_rc_lut_2d_r2__n_x[1] - _battery_cell1_parallel_rc_lut_2d_r2__n_x[0])));}x_leftIndex=0;}else{if((_battery_cell1_soh_set__out < _battery_cell1_parallel_rc_lut_2d_r2__n_x[(2 - 1)])){x_curAddr=(((2 - 1)) / 2);x_leftIndex=0;x_rightIndex=(2 - 1);while((1 < (x_rightIndex - x_leftIndex))){if((_battery_cell1_soh_set__out < _battery_cell1_parallel_rc_lut_2d_r2__n_x[x_curAddr])){x_rightIndex=x_curAddr;}else{x_leftIndex=x_curAddr;}x_curAddr=(((x_leftIndex + x_rightIndex)) / 2);}x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_parallel_rc_lut_2d_r2__n_x[x_leftIndex])) / ((_battery_cell1_parallel_rc_lut_2d_r2__n_x[(x_leftIndex + 1)] - _battery_cell1_parallel_rc_lut_2d_r2__n_x[x_leftIndex])));}else{if((1)){x_fraction=1.0;}else{x_fraction=(((_battery_cell1_soh_set__out - _battery_cell1_parallel_rc_lut_2d_r2__n_x[(2 - 2)])) / ((_battery_cell1_parallel_rc_lut_2d_r2__n_x[(2 - 1)] - _battery_cell1_parallel_rc_lut_2d_r2__n_x[(2 - 2)])));}x_leftIndex=(2 - 2);}}if((_battery_cell1_t_source_switch__out <= _battery_cell1_parallel_rc_lut_2d_r2__n_y[0])){if((1)){y_fraction=0.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_parallel_rc_lut_2d_r2__n_y[0])) / ((_battery_cell1_parallel_rc_lut_2d_r2__n_y[1] - _battery_cell1_parallel_rc_lut_2d_r2__n_y[0])));}y_leftIndex=0;}else{if((_battery_cell1_t_source_switch__out < _battery_cell1_parallel_rc_lut_2d_r2__n_y[(2 - 1)])){y_curAddr=(((2 - 1)) / 2);y_leftIndex=0;y_rightIndex=(2 - 1);while((1 < (y_rightIndex - y_leftIndex))){if((_battery_cell1_t_source_switch__out < _battery_cell1_parallel_rc_lut_2d_r2__n_y[y_curAddr])){y_rightIndex=y_curAddr;}else{y_leftIndex=y_curAddr;}y_curAddr=(((y_leftIndex + y_rightIndex)) / 2);}y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_parallel_rc_lut_2d_r2__n_y[y_leftIndex])) / ((_battery_cell1_parallel_rc_lut_2d_r2__n_y[(y_leftIndex + 1)] - _battery_cell1_parallel_rc_lut_2d_r2__n_y[y_leftIndex])));}else{if((1)){y_fraction=1.0;}else{y_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_parallel_rc_lut_2d_r2__n_y[(2 - 2)])) / ((_battery_cell1_parallel_rc_lut_2d_r2__n_y[(2 - 1)] - _battery_cell1_parallel_rc_lut_2d_r2__n_y[(2 - 2)])));}y_leftIndex=(2 - 2);}}real data_00=_battery_cell1_parallel_rc_lut_2d_r2__n_z[x_leftIndex][y_leftIndex];real data_01=_battery_cell1_parallel_rc_lut_2d_r2__n_z[x_leftIndex][(y_leftIndex + 1)];real data_10=_battery_cell1_parallel_rc_lut_2d_r2__n_z[(x_leftIndex + 1)][y_leftIndex];real data_11=_battery_cell1_parallel_rc_lut_2d_r2__n_z[(x_leftIndex + 1)][(y_leftIndex + 1)];real data_0=(data_00 + (((data_01 - data_00)) * y_fraction));real data_1=(data_10 + (((data_11 - data_10)) * y_fraction));_battery_cell1_parallel_rc_lut_2d_r2__value=(data_0 + (((data_1 - data_0)) * x_fraction));}}
+
+         // Generated from the component: Battery Cell1.Parallel RC.Termination2
+            {
+}
+
+         // Generated from the component: Battery Cell1.Termination8
+            {
+}
+
+         // Generated from the component: Battery Cell1.Hysteresis.Termination3
+            {
+}
+
+         // Generated from the component: Battery Cell1.Open Circuit Voltage.LUT_2D
+            {
+if((1)){int down_x=0;int down_y=0;int up_x=0;int up_y=0;real x_int_coeff=0.0;real y_int_coeff=0.0;if((0)){real input_x_clipped=0.0;real input_y_clipped=0.0;input_x_clipped=((((_battery_cell1_t_source_switch__out) > (_battery_cell1_open_circuit_voltage_lut_2d__n_min_x) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_open_circuit_voltage_lut_2d__n_min_x))) < (_battery_cell1_open_circuit_voltage_lut_2d__n_max_x) ? (((_battery_cell1_t_source_switch__out) > (_battery_cell1_open_circuit_voltage_lut_2d__n_min_x) ? (_battery_cell1_t_source_switch__out) : (_battery_cell1_open_circuit_voltage_lut_2d__n_min_x))) : (_battery_cell1_open_circuit_voltage_lut_2d__n_max_x));input_y_clipped=((((_battery_cell1_soc_model_integrator__out) > (_battery_cell1_open_circuit_voltage_lut_2d__n_min_y) ? (_battery_cell1_soc_model_integrator__out) : (_battery_cell1_open_circuit_voltage_lut_2d__n_min_y))) < (_battery_cell1_open_circuit_voltage_lut_2d__n_max_y) ? (((_battery_cell1_soc_model_integrator__out) > (_battery_cell1_open_circuit_voltage_lut_2d__n_min_y) ? (_battery_cell1_soc_model_integrator__out) : (_battery_cell1_open_circuit_voltage_lut_2d__n_min_y))) : (_battery_cell1_open_circuit_voltage_lut_2d__n_max_y));real x_addr=(((input_x_clipped + _battery_cell1_open_circuit_voltage_lut_2d__n_input_offset_x)) * _battery_cell1_open_circuit_voltage_lut_2d__n_input_sf_x);down_x=((int) trunc(x_addr));real y_addr=(((input_y_clipped + _battery_cell1_open_circuit_voltage_lut_2d__n_input_offset_y)) * _battery_cell1_open_circuit_voltage_lut_2d__n_input_sf_y);down_y=((int) trunc(y_addr));x_int_coeff=(x_addr - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}y_int_coeff=(y_addr - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}else{real input_x_in=0.0;real input_y_in=0.0;real x_addr_tmp=0.0;real y_addr_tmp=0.0;input_x_in=(((_battery_cell1_t_source_switch__out + _battery_cell1_open_circuit_voltage_lut_2d__n_input_offset_x)) * _battery_cell1_open_circuit_voltage_lut_2d__n_input_sf_x);x_addr_tmp=floor(input_x_in);if((x_addr_tmp < 0)){down_x=0;}else{if((x_addr_tmp >= (2 - 1))){down_x=((2 - 1) - 1);}else{down_x=((int) x_addr_tmp);}}x_int_coeff=(input_x_in - down_x);if(((unsigned char) (x_int_coeff != 0))){up_x=(down_x + 1);}else{up_x=down_x;}input_y_in=(((_battery_cell1_soc_model_integrator__out + _battery_cell1_open_circuit_voltage_lut_2d__n_input_offset_y)) * _battery_cell1_open_circuit_voltage_lut_2d__n_input_sf_y);y_addr_tmp=floor(input_y_in);if((y_addr_tmp < 0)){down_y=0;}else{if((y_addr_tmp >= (41 - 1))){down_y=((41 - 1) - 1);}else{down_y=((int) y_addr_tmp);}}y_int_coeff=(input_y_in - down_y);if(((unsigned char) (y_int_coeff != 0))){up_y=(down_y + 1);}else{up_y=down_y;}}real data_00=_battery_cell1_open_circuit_voltage_lut_2d__n_z[down_x][down_y];real data_01=_battery_cell1_open_circuit_voltage_lut_2d__n_z[down_x][up_y];real data_10=_battery_cell1_open_circuit_voltage_lut_2d__n_z[up_x][down_y];real data_11=_battery_cell1_open_circuit_voltage_lut_2d__n_z[up_x][up_y];real data_0=(data_00 + (((data_01 - data_00)) * y_int_coeff));real data_1=(data_10 + (((data_11 - data_10)) * y_int_coeff));_battery_cell1_open_circuit_voltage_lut_2d__value=(data_0 + (((data_1 - data_0)) * x_int_coeff));}else{int x_leftIndex=0;int x_rightIndex=0;int x_curAddr=0;real x_fraction=0.0;int y_leftIndex=0;int y_rightIndex=0;int y_curAddr=0;real y_fraction=0.0;if((_battery_cell1_t_source_switch__out <= _battery_cell1_open_circuit_voltage_lut_2d__n_x[0])){if((0)){x_fraction=0.0;}else{x_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_open_circuit_voltage_lut_2d__n_x[0])) / ((_battery_cell1_open_circuit_voltage_lut_2d__n_x[1] - _battery_cell1_open_circuit_voltage_lut_2d__n_x[0])));}x_leftIndex=0;}else{if((_battery_cell1_t_source_switch__out < _battery_cell1_open_circuit_voltage_lut_2d__n_x[(2 - 1)])){x_curAddr=(((2 - 1)) / 2);x_leftIndex=0;x_rightIndex=(2 - 1);while((1 < (x_rightIndex - x_leftIndex))){if((_battery_cell1_t_source_switch__out < _battery_cell1_open_circuit_voltage_lut_2d__n_x[x_curAddr])){x_rightIndex=x_curAddr;}else{x_leftIndex=x_curAddr;}x_curAddr=(((x_leftIndex + x_rightIndex)) / 2);}x_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_open_circuit_voltage_lut_2d__n_x[x_leftIndex])) / ((_battery_cell1_open_circuit_voltage_lut_2d__n_x[(x_leftIndex + 1)] - _battery_cell1_open_circuit_voltage_lut_2d__n_x[x_leftIndex])));}else{if((0)){x_fraction=1.0;}else{x_fraction=(((_battery_cell1_t_source_switch__out - _battery_cell1_open_circuit_voltage_lut_2d__n_x[(2 - 2)])) / ((_battery_cell1_open_circuit_voltage_lut_2d__n_x[(2 - 1)] - _battery_cell1_open_circuit_voltage_lut_2d__n_x[(2 - 2)])));}x_leftIndex=(2 - 2);}}if((_battery_cell1_soc_model_integrator__out <= _battery_cell1_open_circuit_voltage_lut_2d__n_y[0])){if((0)){y_fraction=0.0;}else{y_fraction=(((_battery_cell1_soc_model_integrator__out - _battery_cell1_open_circuit_voltage_lut_2d__n_y[0])) / ((_battery_cell1_open_circuit_voltage_lut_2d__n_y[1] - _battery_cell1_open_circuit_voltage_lut_2d__n_y[0])));}y_leftIndex=0;}else{if((_battery_cell1_soc_model_integrator__out < _battery_cell1_open_circuit_voltage_lut_2d__n_y[(41 - 1)])){y_curAddr=(((41 - 1)) / 2);y_leftIndex=0;y_rightIndex=(41 - 1);while((1 < (y_rightIndex - y_leftIndex))){if((_battery_cell1_soc_model_integrator__out < _battery_cell1_open_circuit_voltage_lut_2d__n_y[y_curAddr])){y_rightIndex=y_curAddr;}else{y_leftIndex=y_curAddr;}y_curAddr=(((y_leftIndex + y_rightIndex)) / 2);}y_fraction=(((_battery_cell1_soc_model_integrator__out - _battery_cell1_open_circuit_voltage_lut_2d__n_y[y_leftIndex])) / ((_battery_cell1_open_circuit_voltage_lut_2d__n_y[(y_leftIndex + 1)] - _battery_cell1_open_circuit_voltage_lut_2d__n_y[y_leftIndex])));}else{if((0)){y_fraction=1.0;}else{y_fraction=(((_battery_cell1_soc_model_integrator__out - _battery_cell1_open_circuit_voltage_lut_2d__n_y[(41 - 2)])) / ((_battery_cell1_open_circuit_voltage_lut_2d__n_y[(41 - 1)] - _battery_cell1_open_circuit_voltage_lut_2d__n_y[(41 - 2)])));}y_leftIndex=(41 - 2);}}real data_00=_battery_cell1_open_circuit_voltage_lut_2d__n_z[x_leftIndex][y_leftIndex];real data_01=_battery_cell1_open_circuit_voltage_lut_2d__n_z[x_leftIndex][(y_leftIndex + 1)];real data_10=_battery_cell1_open_circuit_voltage_lut_2d__n_z[(x_leftIndex + 1)][y_leftIndex];real data_11=_battery_cell1_open_circuit_voltage_lut_2d__n_z[(x_leftIndex + 1)][(y_leftIndex + 1)];real data_0=(data_00 + (((data_01 - data_00)) * y_fraction));real data_1=(data_10 + (((data_11 - data_10)) * y_fraction));_battery_cell1_open_circuit_voltage_lut_2d__value=(data_0 + (((data_1 - data_0)) * x_fraction));}}
+
+         // Generated from the component: Battery Cell1.SOC
+          {
+HIL_OutAO(0x4001, _battery_cell1_soc_model_integrator__out);}
+
+  
+
+         // Generated from the component: Battery Cell1.Termination3
+            {
+}
+
+         // Generated from the component: Battery Cell1.Sum9
+            {
+_battery_cell1_sum9__out=0;_battery_cell1_sum9__out+=_battery_cell1_cell_no__out;_battery_cell1_sum9__out+=_battery_cell1_constant_zero__out;}
+
+         // Generated from the component: Battery Cell1.Hysteresis.To_As
+            {
+_battery_cell1_hysteresis_to_as__out=(_battery_cell1_hysteresis_to_as__p_gain * _battery_cell1_capacity_lut_2d__value);}
+
+         // Generated from the component: Battery Cell1.SOC Model.Gain1
+            {
+_battery_cell1_soc_model_gain1__out=(_battery_cell1_soc_model_gain1__p_gain * _battery_cell1_capacity_lut_2d__value);}
+
+         // Generated from the component: Battery Cell1.Termination_Q
+            {
+}
+
+         // Generated from the component: Battery Cell1.Hysteresis.Termination2
+            {
+}
+
+         // Generated from the component: Battery Cell1.Termination_R0
+            {
+}
+
+         // Generated from the component: Battery Cell1.Termination4
+            {
+}
+
+         // Generated from the component: Battery Cell1.Hysteresis.Termination_R0
+            {
+}
+
+         // Generated from the component: Battery Cell1.Parallel RC.RC_func_1
+                    _battery_cell1_parallel_rc_rc_func_1__C = _battery_cell1_parallel_rc_lut_2d_c1__value;
+            _battery_cell1_parallel_rc_rc_func_1__R = _battery_cell1_parallel_rc_lut_2d_r1__value;
+            _battery_cell1_parallel_rc_rc_func_1__curr = _battery_cell1_sum9__out;
+
+    {
+    _battery_cell1_parallel_rc_rc_func_1__Tau = _battery_cell1_parallel_rc_rc_func_1__R * _battery_cell1_parallel_rc_rc_func_1__C ; _battery_cell1_parallel_rc_rc_func_1__var = _battery_cell1_parallel_rc_rc_func_1__Tau / 0.0001 ; _battery_cell1_parallel_rc_rc_func_1__R_I = _battery_cell1_parallel_rc_rc_func_1__R * _battery_cell1_parallel_rc_rc_func_1__curr ; _battery_cell1_parallel_rc_rc_func_1__Vrc = ( _battery_cell1_parallel_rc_rc_func_1__R_I + _battery_cell1_parallel_rc_rc_func_1__var * _battery_cell1_parallel_rc_rc_func_1__Vrc_mem ) / ( 1 + _battery_cell1_parallel_rc_rc_func_1__var ) ; _battery_cell1_parallel_rc_rc_func_1__Vrc_mem = _battery_cell1_parallel_rc_rc_func_1__Vrc ; _battery_cell1_parallel_rc_rc_func_1__Ploss = _battery_cell1_parallel_rc_rc_func_1__R_I * _battery_cell1_parallel_rc_rc_func_1__curr ;
+}
+
+         // Generated from the component: Battery Cell1.Parallel RC.RC_func_2
+                    _battery_cell1_parallel_rc_rc_func_2__C = _battery_cell1_parallel_rc_lut_2d_c2__value;
+            _battery_cell1_parallel_rc_rc_func_2__R = _battery_cell1_parallel_rc_lut_2d_r2__value;
+            _battery_cell1_parallel_rc_rc_func_2__curr = _battery_cell1_sum9__out;
+
+    {
+    _battery_cell1_parallel_rc_rc_func_2__Tau = _battery_cell1_parallel_rc_rc_func_2__R * _battery_cell1_parallel_rc_rc_func_2__C ; _battery_cell1_parallel_rc_rc_func_2__var = _battery_cell1_parallel_rc_rc_func_2__Tau / 0.0001 ; _battery_cell1_parallel_rc_rc_func_2__R_I = _battery_cell1_parallel_rc_rc_func_2__R * _battery_cell1_parallel_rc_rc_func_2__curr ; _battery_cell1_parallel_rc_rc_func_2__Vrc = ( _battery_cell1_parallel_rc_rc_func_2__R_I + _battery_cell1_parallel_rc_rc_func_2__var * _battery_cell1_parallel_rc_rc_func_2__Vrc_mem ) / ( 1 + _battery_cell1_parallel_rc_rc_func_2__var ) ; _battery_cell1_parallel_rc_rc_func_2__Vrc_mem = _battery_cell1_parallel_rc_rc_func_2__Vrc ; _battery_cell1_parallel_rc_rc_func_2__Ploss = _battery_cell1_parallel_rc_rc_func_2__R_I * _battery_cell1_parallel_rc_rc_func_2__curr ;
+}
+
+         // Generated from the component: Battery Cell1.Parallel RC.Termination1
+            {
+}
+
+         // Generated from the component: Battery Cell1.SOC Model.Coulombic_Eff
+                    _battery_cell1_soc_model_coulombic_eff__eta = _battery_cell1_coulombic_efficiency_lut_2d__value;
+            _battery_cell1_soc_model_coulombic_eff__i = _battery_cell1_sum9__out;
+
+    {
+    if ( _battery_cell1_soc_model_coulombic_eff__i > 0 ) _battery_cell1_soc_model_coulombic_eff__i_out = _battery_cell1_soc_model_coulombic_eff__i ; else _battery_cell1_soc_model_coulombic_eff__i_out = _battery_cell1_soc_model_coulombic_eff__eta * _battery_cell1_soc_model_coulombic_eff__i ;
+}
+
+         // Generated from the component: Battery Cell1.Series voltage drop.Product
+            {
+_battery_cell1_series_voltage_drop_product__out=1;_battery_cell1_series_voltage_drop_product__out*=_battery_cell1_sum9__out;_battery_cell1_series_voltage_drop_product__out*=_battery_cell1_internal_resistance_lut_2d__value;}
+
+         // Generated from the component: Battery Cell1.Termination7
+            {
+}
+
+         // Generated from the component: Battery Cell1.Hysteresis.Termination1
+            {
+}
+
+         // Generated from the component: Battery Cell1.Parallel RC.Sum
+            {
+_battery_cell1_parallel_rc_sum__out=0;_battery_cell1_parallel_rc_sum__out+=_battery_cell1_parallel_rc_rc_func_1__Vrc;_battery_cell1_parallel_rc_sum__out+=_battery_cell1_parallel_rc_rc_func_2__Vrc;}
+
+         // Generated from the component: Battery Cell1.Parallel RC.Sum1
+            {
+_battery_cell1_parallel_rc_sum1__out=0;_battery_cell1_parallel_rc_sum1__out+=_battery_cell1_parallel_rc_rc_func_1__Ploss;_battery_cell1_parallel_rc_sum1__out+=_battery_cell1_parallel_rc_rc_func_2__Ploss;}
+
+         // Generated from the component: Battery Cell1.SOC Model.Product1
+            {
+_battery_cell1_soc_model_product1__out=1;_battery_cell1_soc_model_product1__out*=_battery_cell1_soc_model_coulombic_eff__i_out;_battery_cell1_soc_model_product1__out/=_battery_cell1_soc_model_gain1__out;}
+
+         // Generated from the component: Battery Cell1.Parallel RC.Termination33
+            {
+}
+
+         // Generated from the component: Battery Cell1.Sum3
+            {
+_battery_cell1_sum3__out=0;_battery_cell1_sum3__out+=_battery_cell1_open_circuit_voltage_lut_2d__value;_battery_cell1_sum3__out+=_battery_cell1_hysteresis_constant_0__out;_battery_cell1_sum3__out-=_battery_cell1_series_voltage_drop_product__out;_battery_cell1_sum3__out-=_battery_cell1_parallel_rc_sum__out;}
+
+         // Generated from the component: Battery Cell1.Termination14
+            {
+}
+
+         // Generated from the component: Battery Cell1.Parallel RC.Termination34
+            {
+}
+
+         // Generated from the component: Battery Cell1.Signal switch1
+            {
+{if((0)){if(((_battery_cell1_vcell_override__out < _battery_cell1_signal_switch1__p_threshold))){_battery_cell1_signal_switch1__out=_battery_cell1_sum3__out;}else{_battery_cell1_signal_switch1__out=_battery_cell1_vcell_value_set__out;}}else{if((1)){if(((_battery_cell1_vcell_override__out > _battery_cell1_signal_switch1__p_threshold))){_battery_cell1_signal_switch1__out=_battery_cell1_vcell_value_set__out;}else{_battery_cell1_signal_switch1__out=_battery_cell1_sum3__out;}}else{if(((_battery_cell1_vcell_override__out != _battery_cell1_signal_switch1__p_threshold))){_battery_cell1_signal_switch1__out=_battery_cell1_vcell_value_set__out;}else{_battery_cell1_signal_switch1__out=_battery_cell1_sum3__out;}}}}}
+
+         // Generated from the component: Battery Cell1.Product1
+            {
+_battery_cell1_product1__out=1;_battery_cell1_product1__out*=_battery_cell1_signal_switch1__out;_battery_cell1_product1__out*=_battery_cell1_constant_one__out;}
+
+         // Generated from the component: Battery Cell1.Cell voltage
+          {
+HIL_OutAO(0x4000, _battery_cell1_product1__out);}
+
+  
+
+         // Generated from the component: Battery Cell1.Termination10
+            {
+}
+
+         // Generated from the component: Battery Cell1.Vt.Vs1
+            {
+HIL_OutFloat(0x82c0000, _battery_cell1_product1__out);}
+
+         // Generated from the component: Battery Cell1.t_v
+            {
+}
+
+//@cmp.out.block.end
+
+
+    //////////////////////////////////////////////////////////////////////////
+    // Update block
+    //////////////////////////////////////////////////////////////////////////
+    //@cmp.update.block.start
+         // Generated from the component: Battery Cell1.Hysteresis.Constant_0
+            
+         // Generated from the component: Battery Cell1.It.Ia1
+            
+         // Generated from the component: Battery Cell1.Passive Balancing.Constant_0
+            
+         // Generated from the component: Battery Cell1.SOC Model.Edge Detection1.Unit Delay1
+            {
+_battery_cell1_soc_model_edge_detection1_unit_delay1__state=_battery_cell1_soc_model_soc_override__out;}
+         // Generated from the component: Battery Cell1.constant one
+            
+         // Generated from the component: Battery Cell1.constant zero
+            
+         // Generated from the component: temperature
+            
+         // Generated from the component: Battery Cell1.Termination9
+            
+         // Generated from the component: Battery Cell1.Termination2
+            
+         // Generated from the component: Battery Cell1.SOC Model.Edge Detection1.Relational operator1
+            
+         // Generated from the component: Battery Cell1.Parallel RC.Termination3
+            
+         // Generated from the component: Battery Cell1.Termination1
+            
+         // Generated from the component: Battery Cell1.Product2
+            
+         // Generated from the component: Battery Cell1.Termination15
+            
+         // Generated from the component: Battery Cell1.Termination16
+            
+         // Generated from the component: Battery Cell1.Termination17
+            
+         // Generated from the component: Battery Cell1.T_source_switch
+            
+         // Generated from the component: Battery Cell1.SOC Model.Integrator
+            {
+{{if((1)){if(((_battery_cell1_soc_model_edge_detection1_relational_operator1__out > 0) && (_battery_cell1_soc_model_integrator__reset_state <= 0))){_battery_cell1_soc_model_integrator__state=_battery_cell1_soc_model_soc_override__out;{{int i;i=0;{
+_battery_cell1_soc_model_integrator__state+=(_battery_cell1_soc_model_product1__out * _battery_cell1_soc_model_integrator__p_execution_rate);}}}}else{{int i;i=0;{
+_battery_cell1_soc_model_integrator__state+=(_battery_cell1_soc_model_product1__out * _battery_cell1_soc_model_integrator__p_execution_rate);}}}}else{if((0)){if(((_battery_cell1_soc_model_edge_detection1_relational_operator1__out <= 0) && (_battery_cell1_soc_model_integrator__reset_state > 0))){_battery_cell1_soc_model_integrator__state=_battery_cell1_soc_model_soc_override__out;{{int i;i=0;{
+_battery_cell1_soc_model_integrator__state+=(_battery_cell1_soc_model_product1__out * _battery_cell1_soc_model_integrator__p_execution_rate);}}}}else{{int i;i=0;{
+_battery_cell1_soc_model_integrator__state+=(_battery_cell1_soc_model_product1__out * _battery_cell1_soc_model_integrator__p_execution_rate);}}}}else{if((0)){if(((((_battery_cell1_soc_model_edge_detection1_relational_operator1__out > 0) && (_battery_cell1_soc_model_integrator__reset_state <= 0))) || (((_battery_cell1_soc_model_edge_detection1_relational_operator1__out <= 0) && (_battery_cell1_soc_model_integrator__reset_state > 0))))){_battery_cell1_soc_model_integrator__state=_battery_cell1_soc_model_soc_override__out;{{int i;i=0;{
+_battery_cell1_soc_model_integrator__state+=(_battery_cell1_soc_model_product1__out * _battery_cell1_soc_model_integrator__p_execution_rate);}}}}else{{int i;i=0;{
+_battery_cell1_soc_model_integrator__state+=(_battery_cell1_soc_model_product1__out * _battery_cell1_soc_model_integrator__p_execution_rate);}}}}else{if((0)){if((_battery_cell1_soc_model_edge_detection1_relational_operator1__out != 0)){_battery_cell1_soc_model_integrator__state=_battery_cell1_soc_model_soc_override__out;{{int i;i=0;{
+_battery_cell1_soc_model_integrator__state+=(_battery_cell1_soc_model_product1__out * _battery_cell1_soc_model_integrator__p_execution_rate);}}}}else{{int i;i=0;{
+_battery_cell1_soc_model_integrator__state+=(_battery_cell1_soc_model_product1__out * _battery_cell1_soc_model_integrator__p_execution_rate);}}}}}}}}}{_battery_cell1_soc_model_integrator__reset_state=_battery_cell1_soc_model_edge_detection1_relational_operator1__out;}if(_battery_cell1_soc_model_integrator__p_limit_output){{if((_battery_cell1_soc_model_integrator__n_upper_limit[0] != INFINITY)){_battery_cell1_soc_model_integrator__state=((_battery_cell1_soc_model_integrator__state) < (_battery_cell1_soc_model_integrator__n_upper_limit[0]) ? (_battery_cell1_soc_model_integrator__state) : (_battery_cell1_soc_model_integrator__n_upper_limit[0]));}if((_battery_cell1_soc_model_integrator__n_lower_limit[0] != (- INFINITY))){_battery_cell1_soc_model_integrator__state=((_battery_cell1_soc_model_integrator__state) > (_battery_cell1_soc_model_integrator__n_lower_limit[0]) ? (_battery_cell1_soc_model_integrator__state) : (_battery_cell1_soc_model_integrator__n_lower_limit[0]));}}}}
+         // Generated from the component: Battery Cell1.Cell_NO
+            
+         // Generated from the component: Battery Cell1.Capacity.LUT_2D
+            
+         // Generated from the component: Battery Cell1.Coulombic efficiency.LUT_2D
+            
+         // Generated from the component: Battery Cell1.Hysteresis.Termination4
+            
+         // Generated from the component: Battery Cell1.Internal Resistance.LUT_2D
+            
+         // Generated from the component: Battery Cell1.Parallel RC.LUT_2D_C1
+            
+         // Generated from the component: Battery Cell1.Parallel RC.LUT_2D_C2
+            
+         // Generated from the component: Battery Cell1.Parallel RC.LUT_2D_R1
+            
+         // Generated from the component: Battery Cell1.Parallel RC.LUT_2D_R2
+            
+         // Generated from the component: Battery Cell1.Parallel RC.Termination2
+            
+         // Generated from the component: Battery Cell1.Termination8
+            
+         // Generated from the component: Battery Cell1.Hysteresis.Termination3
+            
+         // Generated from the component: Battery Cell1.Open Circuit Voltage.LUT_2D
+            
+         // Generated from the component: Battery Cell1.SOC
+            
+         // Generated from the component: Battery Cell1.Termination3
+            
+         // Generated from the component: Battery Cell1.Sum9
+            
+         // Generated from the component: Battery Cell1.Hysteresis.To_As
+            
+         // Generated from the component: Battery Cell1.SOC Model.Gain1
+            
+         // Generated from the component: Battery Cell1.Termination_Q
+            
+         // Generated from the component: Battery Cell1.Hysteresis.Termination2
+            
+         // Generated from the component: Battery Cell1.Termination_R0
+            
+         // Generated from the component: Battery Cell1.Termination4
+            
+         // Generated from the component: Battery Cell1.Hysteresis.Termination_R0
+            
+         // Generated from the component: Battery Cell1.Parallel RC.RC_func_1
+        
+    {
+}
+
+         // Generated from the component: Battery Cell1.Parallel RC.RC_func_2
+        
+    {
+}
+
+         // Generated from the component: Battery Cell1.Parallel RC.Termination1
+            
+         // Generated from the component: Battery Cell1.SOC Model.Coulombic_Eff
+        
+    {
+}
+
+         // Generated from the component: Battery Cell1.Series voltage drop.Product
+            
+         // Generated from the component: Battery Cell1.Termination7
+            
+         // Generated from the component: Battery Cell1.Hysteresis.Termination1
+            
+         // Generated from the component: Battery Cell1.Parallel RC.Sum
+            
+         // Generated from the component: Battery Cell1.Parallel RC.Sum1
+            
+         // Generated from the component: Battery Cell1.SOC Model.Product1
+            
+         // Generated from the component: Battery Cell1.Parallel RC.Termination33
+            
+         // Generated from the component: Battery Cell1.Sum3
+            
+         // Generated from the component: Battery Cell1.Termination14
+            
+         // Generated from the component: Battery Cell1.Parallel RC.Termination34
+            
+         // Generated from the component: Battery Cell1.Signal switch1
+            
+         // Generated from the component: Battery Cell1.Product1
+            
+         // Generated from the component: Battery Cell1.Cell voltage
+            
+         // Generated from the component: Battery Cell1.Termination10
+            
+         // Generated from the component: Battery Cell1.Vt.Vs1
+            
+         // Generated from the component: Battery Cell1.t_v
+            
+    //@cmp.update.block.end
+}
+// ----------------------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------------------

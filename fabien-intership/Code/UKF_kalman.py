@@ -253,14 +253,14 @@ Kn = np.array([[0],[0],[0]])
 ocv_k = np.polyval(p_coeffs_ocv, soc_estimated[0])
 # --- 3. Boucle Temps Réel (BMS) ---
 print('Starting Real-Time RLS with Coulomb Counting...')
-
+print(p_coeffs_ocv)
 for k in range(N):
 
    
 
     u_k = I_meas[k]
     
-    # D. Pure dynamics
+    # Pure dynamics
     y_rls = ocv_k - V_meas[k]
     
     # --- START OF RLS ---
@@ -270,7 +270,7 @@ for k in range(N):
         if abs(u_k) > 0.05 or abs(u_k - u_past[0]) > 0.05:
             theta, P = rls_step(y_rls, phi_k, theta, P, lmbda)
  
-    # E. Save parameters
+    # Save parameters
     theta_history[k, :] = theta.flatten()
     
     # F. Convert to 2RC
