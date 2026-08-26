@@ -14,7 +14,7 @@ def load_battery_data(file_path):
     """
     df = pd.read_csv(file_path, sep=None, engine='python')
     
-    # Détection du nouveau format CSV (ex: MPDch_045deg.csv)
+    # Détection du nouveau format CSV 
     if 'Tempo_s' in df.columns:
         time = df['Tempo_s'].values
         I_meas = df['Corrente_A'].values
@@ -126,11 +126,11 @@ def generate_sigma_points(x_k, P, kappa):
 Ts = 1.0  
 initial_soc = 100
 
-# Fichiers de caractérisation OCV (Laisse ceux-ci tels quels ou mets les tiens)
+# Fichiers de caractérisation OCV 
 file_charge = r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_CCCV005.0_02022026.txt"
 file_discharge = r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_CDch005.0_02022026.txt"
 
-# --- LISTE DE TES FICHIERS SOUS DIFFÉRENTES TEMPÉRATURES ---
+# --- LISTE DES FICHIERS DE TEST SOUS DIFFÉRENTES TEMPÉRATURES ---
 
 test_files = [
     r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_RSDch_24022026.txt",
@@ -139,7 +139,13 @@ test_files = [
     r"C:\Users\PRH\Downloads\MPDch_045deg.csv",
     r"C:\Users\PRH\Downloads\MPDch_035deg.csv",
     r"C:\Users\PRH\Downloads\MPDch_025deg.csv",
-    
+    r"C:\Users\PRH\Downloads\DST_060deg.csv",
+    r"C:\Users\PRH\Downloads\DST_050deg.csv",
+    r"C:\Users\PRH\Downloads\MPDch_040deg.csv",
+    r"C:\Users\PRH\Downloads\MPDch_030deg.csv",
+    r"C:\Users\PRH\Downloads\MPDch_020deg.csv",
+    r"C:\Users\PRH\Downloads\MPDch_010deg.csv",
+    r"C:\Users\PRH\Downloads\MPDch_000deg.csv"
 ]
 
 # Chargement OCV
@@ -203,7 +209,7 @@ for file_path in test_files:
     for k in range(N):
         u_k = I_meas[k]
         
-        # A. RLS Électrique
+        # RLS Électrique
         y_rls = ocv_k - V_meas[k]
         if k > 1: 
             phi_k = np.array([y_past[0], y_past[1], u_k, u_past[0], u_past[1]])
@@ -220,16 +226,8 @@ for file_path in test_files:
         B = np.array([[r1*(1-a1)], [r2*(1-a2)], [b3]])
         D = np.array([[-r0]])
 
-        # B. RLS Thermique
-        H_k = abs(u_k) * abs(ocv_k - V_meas[k])
-        if k > 1:
-            phi_th = np.array([T_s_past, -T_a_past, H_past])
-            theta_th, P_th = rls_step(Ts_meas[k], phi_th, theta_th, P_th, lmbda_th)
-        
-        T_s_est[k] = (np.array([T_s_past, -T_a_past, H_past]).T @ theta_th).item()
-        T_s_past, T_a_past, H_past = Ts_meas[k], Ta_meas[k], H_k
 
-        # C. UKF
+        # UKF
         sigma_points = generate_sigma_points(x_k, P_KF, kappa)
         sigma_points_pred = np.zeros((3,7))
         for i in range(7):
@@ -266,7 +264,7 @@ for file_path in test_files:
         y_past = np.array([y_rls, y_past[0]])
         u_past = np.array([u_k, u_past[0]])
 
-    # Ajout des données de ce test (après 50s pour éviter l'instabilité RLS initiale)
+    # Ajout des données de ce test après 50s pour éviter l'instabilité RLS initiale
     valid_char = time > 50
     all_Ts.extend(Ts_meas[valid_char])
     all_R0.extend(R0_temp[valid_char])
@@ -286,21 +284,31 @@ all_R2 = np.array(all_R2)
 all_C2 = np.array(all_C2)
 
 # =============================================================================
-# --- 4. IDENTIFICATION DU MODÈLE GLOBAL ---
+# --- 4. NETTOYAGE DES DONNÉES (FILTRAGE ) ---
+# =============================================================================
+# On définit des limites physiques acceptables 
+mask_R0 = (all_R0 > 0.005) & (all_R0 < 0.15)    # R0 entre 5 mOhm et 150 mOhm
+mask_R1 = (all_R1 > 0.001) & (all_R1 < 0.2)
+mask_C1 = (all_C1 > 100) & (all_C1 < 60000)     # C1 raisonnable (100F à 60kF)
+mask_R2 = (all_R2 > 0.001) & (all_R2 < 0.2)
+mask_C2 = (all_C2 > 500) & (all_C2 < 100000)
+
+# =============================================================================
+# --- 5. IDENTIFICATION DES MODÈLES
 # =============================================================================
 # Modèle d'Arrhenius pour R0
-coeffs_R0 = np.polyfit(all_Ts, np.log(all_R0), 1)
+coeffs_R0 = np.polyfit(all_Ts[mask_R0], np.log(all_R0[mask_R0]), 1)
 B_R0 = coeffs_R0[0]
 A_R0 = np.exp(coeffs_R0[1])
 
-# Modèles polynomiaux du second degré pour les autres composants
-coeffs_R1 = np.polyfit(all_Ts, all_R1, 2)
-coeffs_C1 = np.polyfit(all_Ts, all_C1, 2)
-coeffs_R2 = np.polyfit(all_Ts, all_R2, 2)
-coeffs_C2 = np.polyfit(all_Ts, all_C2, 2)
+# Modèles polynomiaux pour les autres composants
+coeffs_R1 = np.polyfit(all_Ts[mask_R1], all_R1[mask_R1], 2)
+coeffs_C1 = np.polyfit(all_Ts[mask_C1], all_C1[mask_C1], 2)
+coeffs_R2 = np.polyfit(all_Ts[mask_R2], all_R2[mask_R2], 2)
+coeffs_C2 = np.polyfit(all_Ts[mask_C2], all_C2[mask_C2], 2)
 
 print("\n" + "="*50)
-print("ÉQUATIONS DU MODÈLE THERMO-ÉLECTRIQUE")
+print("ÉQUATIONS DU MODÈLE THERMO-ÉLECTRIQUE ")
 print("="*50)
 print(f"R0(Ts) = {A_R0:.4e} * exp({B_R0:.4f} * Ts)")
 print(f"R1(Ts) = {coeffs_R1[0]:.6e}*Ts^2 + {coeffs_R1[1]:.6e}*Ts + {coeffs_R1[2]:.4e}")
@@ -310,16 +318,15 @@ print(f"C2(Ts) = {coeffs_C2[0]:.4e}*Ts^2 + {coeffs_C2[1]:.4e}*Ts + {coeffs_C2[2]
 print("="*50)
 
 # =============================================================================
-# --- 5. AFFICHAGE DES RÉSULTATS GLOBAUX ---
+# --- 6. AFFICHAGE DES RÉSULTATS NETTOYÉS ---
 # =============================================================================
 fig, axs = plt.subplots(3, 2, figsize=(14, 10))
-fig.suptitle("Identification des Composants 2RC (Tous Tests Confondus)", fontweight='bold', fontsize=14)
+fig.suptitle("Composants 2RC (Données Filtrées)", fontweight='bold', fontsize=14)
 
-# Axe continu pour tracer des courbes de tendance propres
 Ts_axis = np.linspace(np.min(all_Ts), np.max(all_Ts), 200)
 
 # R0
-axs[0, 0].scatter(all_Ts, all_R0, s=2, alpha=0.3, color='blue')
+axs[0, 0].scatter(all_Ts[mask_R0], all_R0[mask_R0], s=2, alpha=0.3, color='blue')
 axs[0, 0].plot(Ts_axis, A_R0 * np.exp(B_R0 * Ts_axis), color='red', linewidth=2, label='Fit Arrhenius')
 axs[0, 0].set_title('R0 = f(Ts)')
 axs[0, 0].set_ylabel('R0 (Ohms)')
@@ -327,27 +334,26 @@ axs[0, 0].legend()
 axs[0, 0].grid(True, linestyle=':')
 
 # R1
-axs[1, 0].scatter(all_Ts, all_R1, s=2, alpha=0.3, color='orange')
-axs[1, 0].plot(Ts_axis, np.polyval(coeffs_R1, Ts_axis), color='black', linewidth=2, label='Fit Poly 2')
+axs[1, 0].scatter(all_Ts[mask_R1], all_R1[mask_R1], s=2, alpha=0.3, color='orange')
+axs[1, 0].plot(Ts_axis, np.polyval(coeffs_R1, Ts_axis), color='black', linewidth=2)
 axs[1, 0].set_title('R1 = f(Ts)')
-axs[1, 0].legend()
 axs[1, 0].grid(True, linestyle=':')
 
 # C1
-axs[2, 0].scatter(all_Ts, all_C1, s=2, alpha=0.3, color='green')
+axs[2, 0].scatter(all_Ts[mask_C1], all_C1[mask_C1], s=2, alpha=0.3, color='green')
 axs[2, 0].plot(Ts_axis, np.polyval(coeffs_C1, Ts_axis), color='black', linewidth=2)
 axs[2, 0].set_title('C1 = f(Ts)')
 axs[2, 0].set_xlabel('Température (°C)')
 axs[2, 0].grid(True, linestyle=':')
 
 # R2
-axs[0, 1].scatter(all_Ts, all_R2, s=2, alpha=0.3, color='red')
+axs[0, 1].scatter(all_Ts[mask_R2], all_R2[mask_R2], s=2, alpha=0.3, color='red')
 axs[0, 1].plot(Ts_axis, np.polyval(coeffs_R2, Ts_axis), color='black', linewidth=2)
 axs[0, 1].set_title('R2 = f(Ts)')
 axs[0, 1].grid(True, linestyle=':')
 
 # C2
-axs[1, 1].scatter(all_Ts, all_C2, s=2, alpha=0.3, color='purple')
+axs[1, 1].scatter(all_Ts[mask_C2], all_C2[mask_C2], s=2, alpha=0.3, color='purple')
 axs[1, 1].plot(Ts_axis, np.polyval(coeffs_C2, Ts_axis), color='black', linewidth=2)
 axs[1, 1].set_title('C2 = f(Ts)')
 axs[1, 1].set_xlabel('Température (°C)')
