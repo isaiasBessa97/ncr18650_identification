@@ -187,7 +187,7 @@ initial_soc = 100
 # Attention aux chemins Windows : utiliser r"..." pour "raw string"
 file_charge = r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_CCCV005.0_02022026.txt"
 file_discharge = r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_CDch005.0_02022026.txt"
-file_test = r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_MPDch_24022026.txt"
+file_test = r"C:\Users\PRH\Downloads\MPDch_045deg.csv"
 
 soc_ocv, V_ocv_raw, _ = get_ocv(file_charge, file_discharge)
 
