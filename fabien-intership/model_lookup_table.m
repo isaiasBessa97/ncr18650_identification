@@ -14,7 +14,7 @@ disp('--- ÉTAPE 1: Modélisation de l''OCV ---');
 
 if isequal(f_ch,0) || isequal(f_dis,0); error('Fichiers OCV manquants'); end
 
-% Appel de ta fonction get_ocv
+% Appel de la fonction get_ocv
 [soc_ocv, V_ocv_raw, ~] = get_ocv(fullfile(p_ch, f_ch), fullfile(p_dis, f_dis));
 
 % Calcul du polynôme 
@@ -39,13 +39,22 @@ file_path = fullfile(p_data, f_data);
 [soc_rc, R1_vec, C1_vec, R2_vec, C2_vec] = get_rc_parameters(file_path, Qn_nominal, initial_soc, current_step);
 
 % C. NETTOYAGE POUR LUT (Obligatoire pour interp1)
-[soc_rc_lut, idx_rc] = unique(soc_rc);
-R1_lut = R1_vec(idx_rc);
-C1_lut = C1_vec(idx_rc);
-R2_lut = R2_vec(idx_rc);
-C2_lut = C2_vec(idx_rc);
+% Filtrage : on supprime physiquement les valeurs d'extraction ratées (<= 0)
+valid_rc = (C1_vec > 0) & (C2_vec > 0);
+soc_rc_clean = soc_rc(valid_rc);
+R1_clean = R1_vec(valid_rc);
+C1_clean = C1_vec(valid_rc);
+R2_clean = R2_vec(valid_rc);
+C2_clean = C2_vec(valid_rc);
 
-[soc_r0_lut, idx_r0] = unique(soc_r0);
+% Utilisation de 'first' pour récupérer le début du palier, avant que la valeur ne retombe potentiellement à 0
+[soc_rc_lut, idx_rc] = unique(soc_rc_clean, 'first');
+R1_lut = R1_clean(idx_rc);
+C1_lut = C1_clean(idx_rc);
+R2_lut = R2_clean(idx_rc);
+C2_lut = C2_clean(idx_rc);
+
+[soc_r0_lut, idx_r0] = unique(soc_r0, 'first');
 R0_lut = r0_vals(idx_r0);
 
 %% 4. ÉTAPE 3 : Chargement du Profil de Validation
@@ -55,6 +64,11 @@ data_val = readmatrix(file_path, 'Delimiter', ';', 'NumHeaderLines', 1);
 t_vec = data_val(:, 1);
 V_mes = data_val(:, 2);
 I_vec = data_val(:, 3); % Vecteur courant u(k)
+
+% SÉCURITÉ UNITÉ : Si les valeurs de courant dépassent 100, on assume des mA et on convertit en A
+if max(abs(I_vec)) > 100
+    I_vec = I_vec / 1000;
+end
 N = length(I_vec);
 
 %% 5. ÉTAPE 4 : Boucle de Simulation Dynamique (Modèle LTV)
@@ -80,7 +94,6 @@ for k = 1:N
     phi_k = polyval(p_coeffs_ocv, soc_percent);
     
     % SÉCURITÉ EULER : On empêche le terme (1 - Ts/RC) de devenir négatif ou nul
-    % C'est ce qui faisait exploser ton graphique à 10^307
     A11 = max(0.01, 1 - Ts/(R1_k*C1_k));
     A22 = max(0.01, 1 - Ts/(R2_k*C2_k));
     
@@ -98,7 +111,9 @@ for k = 1:N
     V_sim(k) = C_k * x(:, k) + D_k * I_vec(k) + phi_k;
     
     if k < N
-        x(:, k+1) = A_k * x(:, k) + B_k * I_vec(k);
+        x_next = A_k * x(:, k) + B_k * I_vec(k);
+        x_next(3) = min(1, max(0, x_next(3))); % Bloque strictement le SoC entre 0 et 1 (100%)
+        x(:, k+1) = x_next;
     end
 end
 
@@ -127,21 +142,44 @@ figure('Color', 'w', 'Name', 'Paramètres RC et R0 vs SoC', 'Position', [100, 10
 
 % Graph du haut : Les Résistances (R0, R1, R2)
 subplot(2,1,1); hold on; grid on;
-plot(soc_r0, R0_lut, '-ok', 'LineWidth', 1.5, 'MarkerFaceColor', 'k', 'DisplayName', 'R_0 (Interne)');
-plot(soc_rc, R1_lut, '-ob', 'LineWidth', 1.5, 'MarkerFaceColor', 'b', 'DisplayName', 'R_1 (Rapide)');
-plot(soc_rc, R2_lut, '-or', 'LineWidth', 1.5, 'MarkerFaceColor', 'r', 'DisplayName', 'R_2 (Lente)');
+plot(soc_r0_lut, R0_lut, '-ok', 'LineWidth', 1.5, 'MarkerFaceColor', 'k', 'DisplayName', 'R_0 ');
+plot(soc_rc_lut, R1_lut, '-ob', 'LineWidth', 1.5, 'MarkerFaceColor', 'b', 'DisplayName', 'R_1 ');
+plot(soc_rc_lut, R2_lut, '-or', 'LineWidth', 1.5, 'MarkerFaceColor', 'r', 'DisplayName', 'R_2 ');
 xlabel('SoC [%]', 'FontWeight', 'bold');
-ylabel('Résistance [\Omega]', 'FontWeight', 'bold');
-title('Évolution des Résistances identifiées en fonction du SoC');
+ylabel('Resistance [\Omega]', 'FontWeight', 'bold');
+title('Evolution of Resistances function of SOC ');
 legend('Location', 'best');
 set(gca, 'XDir', 'reverse'); % Pour afficher de 100% à 0%
 
 % Graph du bas : Les Capacités (C1, C2)
 subplot(2,1,2); hold on; grid on;
-plot(soc_rc, C1_lut, '-og', 'LineWidth', 1.5, 'MarkerFaceColor', 'g', 'DisplayName', 'C_1 (Rapide)');
-plot(soc_rc, C2_lut, '-om', 'LineWidth', 1.5, 'MarkerFaceColor', 'm', 'DisplayName', 'C_2 (Lente)');
+plot(soc_rc_lut, C1_lut, '-og', 'LineWidth', 1.5, 'MarkerFaceColor', 'g', 'DisplayName', 'C_1 ');
+plot(soc_rc_lut, C2_lut, '-om', 'LineWidth', 1.5, 'MarkerFaceColor', 'm', 'DisplayName', 'C_2 ');
 xlabel('SoC [%]', 'FontWeight', 'bold');
-ylabel('Capacité [F]', 'FontWeight', 'bold');
-title('Évolution des Capacités identifiées en fonction du SoC');
+ylabel('Capacity [F]', 'FontWeight', 'bold');
+title('Evolution Capacity function of SOC');
 legend('Location', 'best');
 set(gca, 'XDir', 'reverse');
+
+%% --- EXPORTATION DES PARAMÈTRES EN TABLEAU (CSV) ---
+disp('--- Création du tableau des paramètres (LUT) ---');
+% On crée une grille de SoC propre (de 100% à 0% par pas de 5%)
+soc_grid = (100:-5:0)'; 
+
+% On interpole toutes les valeurs sur cette grille commune
+R0_grid = interp1(soc_r0_lut, R0_lut, soc_grid, 'linear', 'extrap');
+R1_grid = interp1(soc_rc_lut, R1_lut, soc_grid, 'linear', 'extrap');
+C1_grid = interp1(soc_rc_lut, C1_lut, soc_grid, 'linear', 'extrap');
+R2_grid = interp1(soc_rc_lut, R2_lut, soc_grid, 'linear', 'extrap');
+C2_grid = interp1(soc_rc_lut, C2_lut, soc_grid, 'linear', 'extrap');
+
+% Création du tableau MATLAB
+LUT_Table = table(soc_grid, R0_grid, R1_grid, C1_grid, R2_grid, C2_grid, ...
+    'VariableNames', {'SoC_Percent', 'R0_Ohms', 'R1_Ohms', 'C1_Farads', 'R2_Ohms', 'C2_Farads'});
+
+% Affichage dans la console
+disp(LUT_Table);
+
+% Sauvegarde dans un fichier Excel ou CSV
+writetable(LUT_Table, 'Parametres_Batterie_LUT.csv');
+disp('Tableau sauvegardé sous le nom : Parametres_Batterie_LUT.csv');

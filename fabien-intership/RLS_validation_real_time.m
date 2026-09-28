@@ -134,7 +134,7 @@ plot(time, V_meas, 'k', 'LineWidth', 1.5); hold on;
 plot(time, V_model, 'r--', 'LineWidth', 1.5);
 ylabel('Voltage (V)', 'FontWeight', 'bold'); 
 xlabel('Time (s)', 'FontWeight', 'bold');
-title(sprintf('Measured vs Model 2RC (RMSE: %.4f V)', rmse_V), 'FontSize', 12);
+title(sprintf('Measured vs Model (RMSE: %.4f V)', rmse_V), 'FontSize', 12);
 legend('V measured (Experimental)', 'V model (RLS Estimation)', 'Location', 'best'); 
 grid on;
 

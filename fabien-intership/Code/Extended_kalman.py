@@ -183,7 +183,7 @@ P = 1*np.eye(5)
 theta = np.array([[0.1], [0.1], [0.01], [0.01], [0.01]]) # Vecteur colonne 5x1
 
 soc_estimated = np.zeros(N)
-soc_estimated[0] = 40 # SOC initial du modèle
+soc_estimated[0] = 80 # SOC initial du modèle
 
 theta_history = np.zeros((N, 5))
 # R0_hist = np.zeros(N); R1_hist = np.zeros(N); C1_hist = np.zeros(N)
@@ -326,28 +326,40 @@ print(f"\nPerformances du Filtre de Kalman (après 10s) :")
 print(f" -> RMSE Tension : {rmse_V:.4f} V")
 print(f" -> RMSE SoC     : {rmse_soc:.2f} %")
 
+# --- Configuration globale de Matplotlib pour imiter le style MATLAB ---
+plt.rcParams.update({
+    "text.usetex": True,           # Interprète LaTeX
+    "font.family": "serif",        # Police classique de LaTeX
+    "font.size": 16,               # Taille de police à 16
+    "axes.grid": True,             # Activation de la grille
+    "grid.color": "#b0b0b0",       # Couleur de grille
+    "grid.linestyle": "-",
+    "grid.linewidth": 0.5,
+    "legend.edgecolor": "black",   # Contour de légende noir
+    "legend.fancybox": False,      # Bords carrés pour la légende
+    "legend.framealpha": 1.0       # Fond blanc opaque pour la légende
+})
+
 # --- Graphique 1 : Comparaison des Tensions ---
-plt.figure(figsize=(12, 5))
-plt.plot(time, V_meas, label='Tension Measured (Expérimentale)', color='black', linewidth=1.5)
-plt.plot(time, V_model, label='Tension modele(Kalman)', color='red', linestyle='--')
-# On intègre le RMSE directement dans le titre
-plt.title(f'Voltage Comparaison: Measured vs Model Kalman (RMSE = {rmse_V:.4f} V)', fontweight='bold')
-plt.xlabel('Temps (s)', fontweight='bold')
-plt.ylabel('Tension (V)', fontweight='bold')
-plt.legend()
-plt.grid(True, linestyle=':', alpha=0.7)
+plt.figure(figsize=(10, 6))
+plt.plot(time, V_meas, 'k', linewidth=2, label=r'Measured Voltage (Experimental)')
+plt.plot(time, V_model, 'r', linewidth=2, label=r'Voltage model (Kalman)')
+
+plt.title(fr'Voltage Comparaison: Measured vs Model Kalman (RMSE = {rmse_V:.4f} V)')
+plt.xlabel(r'Time (s)')
+plt.ylabel(r'Voltage (V)')
+plt.legend(loc='best')
 plt.tight_layout()
 
 # --- Graphique 2 : Comparaison du SoC ---
-plt.figure(figsize=(12, 5))
-plt.plot(time, soc_true, label='SoC REAL (Intégration Théorique)', color='black', linewidth=1.5)
-plt.plot(time, soc_estimated, label='SoC Model (Filtre Kalman)', color='blue', linestyle='--')
-# On intègre le RMSE directement dans le titre
-plt.title(f'State of charge(SoC) : Real vs Estimated (RMSE = {rmse_soc:.2f} %)', fontweight='bold')
-plt.xlabel('Temps (s)', fontweight='bold')
-plt.ylabel('State of Charge (%)', fontweight='bold')
-plt.legend()
-plt.grid(True, linestyle=':', alpha=0.7)
+plt.figure(figsize=(10, 6))
+plt.plot(time, soc_true, 'k', linewidth=2, label=r'SoC REAL')
+plt.plot(time, soc_estimated, 'b', linewidth=2, label=r'SoC Model (Kalman filter)')
+
+plt.title(fr'State of charge (SoC) : Real vs Estimated (RMSE = {rmse_soc:.2f} \%)')
+plt.xlabel(r'Time (s)')
+plt.ylabel(r'State of Charge (\%)')
+plt.legend(loc='best')
 plt.tight_layout()
 
 # Afficher les graphiques

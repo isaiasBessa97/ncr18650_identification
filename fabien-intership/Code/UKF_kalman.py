@@ -187,7 +187,7 @@ initial_soc = 100
 # Attention aux chemins Windows : utiliser r"..." pour "raw string"
 file_charge = r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_CCCV005.0_02022026.txt"
 file_discharge = r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_CDch005.0_02022026.txt"
-file_test = r"C:\Users\PRH\Downloads\MPDch_045deg.csv"
+file_test = r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_MPDch_24022026.txt"
 
 soc_ocv, V_ocv_raw, _ = get_ocv(file_charge, file_discharge)
 
@@ -219,7 +219,7 @@ P = 1*np.eye(5)
 theta = np.array([[0.1], [0.1], [0.01], [0.01], [0.01]]) # Vecteur colonne 5x1
 
 soc_estimated = np.zeros(N)
-soc_estimated[0] = 80 # SOC initial du modèle
+soc_estimated[0] = 100 # SOC initial du modèle
 
 theta_history = np.zeros((N, 5))
 # R0_hist = np.zeros(N); R1_hist = np.zeros(N); C1_hist = np.zeros(N)
@@ -353,7 +353,7 @@ for k in range(N):
     
 
     # Gain de Kalman (on garde bien la variable C)
-    Kn = P_xz / P_zn
+    Kn = 0*(P_xz / P_zn)
 
     innovation = V_meas[k] - y_pred
     # Mise à jour des états et de la covariance
@@ -387,32 +387,44 @@ rmse_V = np.sqrt(np.mean((V_meas[valid_idx] - V_model[valid_idx])**2))
 rmse_soc = np.sqrt(np.mean((soc_true[valid_idx] - soc_estimated[valid_idx])**2))
 
 # Affichage dans la console
-print(f"\nPerformances du Filtre de Kalman (après 10s) :")
-print(f" -> RMSE Tension : {rmse_V:.4f} V")
+print(f"\n Kalman Filter performances after 10s :")
+print(f" -> RMSE Voltage : {rmse_V:.4f} V")
 print(f" -> RMSE SoC     : {rmse_soc:.2f} %")
 
+# --- Configuration globale de Matplotlib pour imiter le style MATLAB ---
+plt.rcParams.update({
+    "text.usetex": True,           # Interprète LaTeX
+    "font.family": "serif",        # Police classique de LaTeX
+    "font.size": 16,               # Taille de police à 16
+    "axes.grid": True,             # Activation de la grille
+    "grid.color": "#b0b0b0",       # Couleur de grille
+    "grid.linestyle": "-",
+    "grid.linewidth": 0.5,
+    "legend.edgecolor": "black",   # Contour de légende noir
+    "legend.fancybox": False,      # Bords carrés pour la légende
+    "legend.framealpha": 1.0       # Fond blanc opaque pour la légende
+})
+
 # --- Graphique 1 : Comparaison des Tensions ---
-plt.figure(figsize=(12, 5))
-plt.plot(time, V_meas, label='Tension Measured (Expérimentale)', color='black', linewidth=1.5)
-plt.plot(time, V_model, label='Tension modele(Kalman)', color='red', linestyle='--')
-# On intègre le RMSE directement dans le titre
-plt.title(f'Voltage Comparaison: Measured vs Model Kalman (RMSE = {rmse_V:.4f} V)', fontweight='bold')
-plt.xlabel('Temps (s)', fontweight='bold')
-plt.ylabel('Tension (V)', fontweight='bold')
-plt.legend()
-plt.grid(True, linestyle=':', alpha=0.7)
+plt.figure(figsize=(10, 6))
+plt.plot(time, V_meas, 'k', linewidth=2, label=r'Measured voltage (Experimental)')
+plt.plot(time, V_model, 'r', linewidth=2, label=r'Voltage model (Kalman filter)')
+
+plt.title(fr'Measured vs Model Kalman (RMSE = {rmse_V:.4f} V)')
+plt.xlabel(r'Time (s)')
+plt.ylabel(r'Voltage (V)')
+plt.legend(loc='best')
 plt.tight_layout()
 
 # --- Graphique 2 : Comparaison du SoC ---
-plt.figure(figsize=(12, 5))
-plt.plot(time, soc_true, label='SoC REAL (Intégration Théorique)', color='black', linewidth=1.5)
-plt.plot(time, soc_estimated, label='SoC Model (Filtre Kalman)', color='blue', linestyle='--')
-# On intègre le RMSE directement dans le titre
-plt.title(f'State of charge(SoC) : Real vs Estimated (RMSE = {rmse_soc:.2f} %)', fontweight='bold')
-plt.xlabel('Temps (s)', fontweight='bold')
-plt.ylabel('State of Charge (%)', fontweight='bold')
-plt.legend()
-plt.grid(True, linestyle=':', alpha=0.7)
+plt.figure(figsize=(10, 6))
+plt.plot(time, soc_true, 'k', linewidth=2, label=r'SoC REAL')
+plt.plot(time, soc_estimated, 'b', linewidth=2, label=r'SoC Model (Kalman Filter)')
+
+plt.title(fr'State of charge (SoC) : Real vs Estimated (RMSE = {rmse_soc:.2f} \%)')
+plt.xlabel(r'Time (s)')
+plt.ylabel(r'State of Charge (\%)')
+plt.legend(loc='best')
 plt.tight_layout()
 
 # Afficher les graphiques

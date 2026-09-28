@@ -66,11 +66,14 @@ V_average = (V_ch_aligned + V_dis_aligned) / 2;
 
 %% 4. Plotting
 figure; hold on; grid on;
-plot(soc_ch_pct, V_ch, 'b', 'DisplayName', 'Charge (0.05C)');
-plot(soc_dis_pct, V_dis, 'r', 'DisplayName', 'Discharge (0.05C)');
+plot(soc_ch_pct, V_ch, 'b', 'DisplayName', 'Charge (0.05C)','LineWidth',2);
+plot(soc_dis_pct, V_dis, 'r', 'DisplayName', 'Discharge (0.05C)','LineWidth',2);
 plot(soc_axe, V_average, 'k', 'LineWidth', 2, 'DisplayName', 'Average (OCV)');
 
-xlabel('State of Charge (%)');
-ylabel('Voltage (V)');
-title('Voltage vs SoC Curves');
-legend('Location', 'best');
+set(gca,'TickLabelInterpreter','latex','FontSize',16)
+xlabel('State of Charge (\%)','interpreter','latex');
+ylabel('Voltage (V)','interpreter','latex');
+title('Voltage vs SoC Curves','interpreter','latex');
+legend('Location', 'southeast','interpreter','latex');
+xlim([0 100])
+ylim([2.5 4.25])

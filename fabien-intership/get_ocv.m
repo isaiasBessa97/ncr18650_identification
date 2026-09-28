@@ -10,17 +10,17 @@ function [soc_axe, V_average, Qn] = get_ocv(file_charge, file_discharge)
 %   V_average      : Resulting Pseudo-OCV voltage vector
 %   Qn             : Calculated nominal capacity (Ah)
 
-    %% 1. Loading Data
-    % Read files (readmatrix handles .txt, .csv, etc.)
-    data_ch = readmatrix(file_charge, 'Delimiter', ';', 'NumHeaderLines', 1);
-    data_dis = readmatrix(file_discharge, 'Delimiter', ';', 'NumHeaderLines', 1);
+    %% 1. Loading Data (Added robustness)
+    % Replacing the old readmatrix calls with a custom robust loading function
+    data_ch = load_battery_data(file_charge);
+    data_dis = load_battery_data(file_discharge);
 
     % Extract columns
     V_ch = data_ch(:, 2);  I_ch = abs(data_ch(:, 3));
     V_dis = data_dis(:, 2); I_dis = abs(data_dis(:, 3));
 
     % Calculate nominal capacity (Qn) in Ah based on discharge
-    Qn = sum(I_dis) / 3600; 
+    Qn = sum(I_dis) / 3600;
 
     %% 2. SoC Calculation (Coulomb Counting)
     % --- CHARGE ---
@@ -46,4 +46,30 @@ function [soc_axe, V_average, Qn] = get_ocv(file_charge, file_discharge)
     V_dis_aligned = interp1(soc_dis_pct, V_dis, soc_axe, 'linear');
 
     V_average = (V_ch_aligned + V_dis_aligned) / 2;
+end
+
+%% --- Helper function for robust file reading ---
+function data = load_battery_data(filename)
+    % Use fileparts to extract the file extension
+    [~, ~, ext] = fileparts(filename);
+    
+    if strcmpi(ext, '.txt')
+        % Original strict behavior: ensures full backward compatibility with old scripts
+        data = readmatrix(filename, 'Delimiter', ';', 'NumHeaderLines', 1);
+        
+    elseif strcmpi(ext, '.csv')
+        % For CSV files, let MATLAB automatically detect the delimiter (, or ;)
+        try
+            % Ignore the first line assuming it is a header
+            data = readmatrix(filename, 'NumHeaderLines', 1);
+        catch
+            % Robust fallback option in case the CSV has a complex structure
+            opts = detectImportOptions(filename);
+            data = readmatrix(filename, opts);
+        end
+        
+    else
+        % Fallback for any other file extension
+        data = readmatrix(filename);
+    end
 end

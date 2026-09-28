@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.linalg import cholesky
 
 # =============================================================================
-# --- 1. FONCTIONS DE BASE ---
+# --- 1. FONCTIONS DE BASE & RLS ---
 # =============================================================================
 def load_battery_data(file_path):
     df = pd.read_csv(file_path, sep=None, engine='python')
@@ -60,29 +60,63 @@ def generate_sigma_points(x_k, P, kappa):
         sigma_points[:, i + 1 + N] = x_k[:, 0] - L[:, i]
     return sigma_points
 
+# Nouvelles fonctions RLS importées de UKF_kalman.py
+def rls_step(y_k, phi_k, theta_prev, P_prev, lmbda):
+    phi_k = phi_k.reshape(-1, 1)
+    den = lmbda + phi_k.T @ P_prev @ phi_k
+    K = (P_prev @ phi_k) / den
+    
+    y_pred = (phi_k.T @ theta_prev).item()
+    e = y_k - y_pred
+    
+    theta_new = theta_prev + K * e
+    P_new = (1 / lmbda) * (P_prev - K @ phi_k.T @ P_prev)
+    
+    return theta_new, P_new
+
+def theta_to_2rc(theta, Ts):
+    a1, a2, b0, b1, b2 = theta.flatten()
+    
+    E, F, G = 1 + a1 - a2, 1 - a1 - a2, 1 + a2
+    if abs(E) < 1e-4 or abs(F) < 1e-4:
+        return 0.05, 0.01, 5000, 0.01, 40000 
+
+    R0 = (b0 - b1 + b2) / E
+    
+    term1 = Ts * G / F
+    term2 = (Ts**2 * E) / (4 * F)
+    delta = max(0, term1**2 - 4 * term2)
+    
+    tau1 = (term1 + np.sqrt(delta)) / 2
+    tau2 = (term1 - np.sqrt(delta)) / 2
+    
+    R_tot = (b0 + b1 + b2) / F
+    sum_tau = tau1 + tau2
+    
+    R1 = (R_tot - R0) * (tau1 / sum_tau) if sum_tau > 0 else 0
+    R2 = (R_tot - R0) * (tau2 / sum_tau) if sum_tau > 0 else 0
+    
+    C1 = tau1 / R1 if R1 > 0 else 0
+    C2 = tau2 / R2 if R2 > 0 else 0
+    
+    return R0, R1, C1, R2, C2
+
 # =============================================================================
 # --- 2. CONFIGURATION ET ÉQUATIONS DU JUMEAU NUMÉRIQUE ---
 # =============================================================================
 Ts = 1.0  
 initial_soc = 100
 
+# Loi d'Arrhenius : R0 = A * exp(B * Ts) (CONSERVÉ)
+A_R0 = 7.0481e-02     
+B_R0 = -0.0187     
 
-# Loi d'Arrhenius : R0 = A * exp(B * Ts)
-A_R0 = 6.9191e-02      
-B_R0 = -0.0193      
+# Les polynômes pour R1, C1, R2, C2 sont désactivés car ils seront calculés par le RLS.
 
-# Polynômes d'ordre 2 : a*Ts^2 + b*Ts + c
-coeffs_R1 = [-8.824978e-05,5.466936e-03, 5.7490e-02]     # [a, b, c]
-coeffs_C1 = [-1.4373, 1.5117e+02, 6.9571e+03]   # [a, b, c]
-coeffs_R2 = [9.132070e-07, -5.766334e-05, 1.0217e-02]    # [a, b, c]
-coeffs_C2 = [4.8260e-01, 8.0579e+01, 9.0909e+03]   # [a, b, c]
-#Coeffice=ients trouves grace au fichier Model_recup_temp_UKF.py
 # Fichiers OCV
-file_charge = r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_CCCV005.0_02022026.txt"
-file_discharge = r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_CDch005.0_02022026.txt"
-
-# Le nouveau fichier de test à valider (ex: profil dynamique dynamique)
-file_test = r"C:\Users\PRH\Downloads\MPDch_045deg.csv"
+file_charge = r"C:\Users\PRH\Downloads\CCCV_005C_025deg.csv"
+file_discharge = r"C:\Users\PRH\Downloads\CDch_005C_025deg.csv"
+file_test = r"C:\Users\PRH\Downloads\MPDch_025deg.csv"
 
 soc_ocv, V_ocv_raw, Qn = get_ocv(file_charge, file_discharge)
 p_coeffs_ocv = np.polyfit(soc_ocv[~np.isnan(V_ocv_raw)], V_ocv_raw[~np.isnan(V_ocv_raw)], 9)
@@ -93,14 +127,18 @@ time, V_meas, I_meas, Ts_meas, _ = load_battery_data(file_test)
 N = len(time)
 
 # =============================================================================
-# --- 3. INITIALISATION DU FILTRE UKF ---
+# --- 3. INITIALISATION DU FILTRE UKF ET DU RLS ---
 # =============================================================================
 
 soc_estimated = np.zeros(N)
-soc_estimated[0] = 100 
-theta_history = np.zeros((N, 5))
+soc_estimated[0] = 80
 V_model = np.zeros(N)
 
+# --- Initialisation RLS ---
+lmbda = 0.9999
+P_rls = 1 * np.eye(5)
+theta = np.array([[0.1], [0.1], [0.01], [0.01], [0.01]])
+theta_history = np.zeros((N, 5))
 y_past = np.zeros(2)
 u_past = np.zeros(2)
 
@@ -109,32 +147,51 @@ x_k = np.array([[0],[0],[soc_estimated[0]]])
 A_mat = np.array([[0,0,0],[0,0,0],[0,0,0]])
 B_mat = np.array([[0],[0],[b3]])
 D_mat = np.array([[-0.1]]) 
-P_KF = np.diag([1, 1, 0.5]) 
+P_KF = np.diag([1e-2, 1e-2, 10.0])
 P_zn = np.array([[0.]])
 P_xz = np.array([[0.],[0.],[0.]])
-Q = np.diag([1e-4, 1e-4, 1e-3]) 
+Q = np.diag([1e-6, 1e-7, 1e-3]) 
 R_kf = np.array([[0.0001]]) 
 kappa = 1
 weight = np.array([[0.4],[0.1],[0.1],[0.1],[0.1],[0.1],[0.1]])  
 soc_estimated[0] = max(0, min(100, x_k[2, 0]))
 Kn = np.array([[0],[0],[0]])
 
-print('Démarrage de la Simulation de Validation (Sans RLS)...')
+print('Démarrage de la Simulation de Validation (Avec RLS pour R1, C1, R2, C2 et Thermique pour R0)...')
 
 # =============================================================================
-# --- 4. BOUCLE DE VALIDATION RAPIDE ---
+# --- 4. BOUCLE DE VALIDATION ---
 # =============================================================================
-for k in range(N):
+start_idx = 33000
+
+for k in range(start_idx, N):
     u_k = I_meas[k]
     T_cell = Ts_meas[k]
     
-    # 1. Calcul instantané des composants grâce aux équations thermiques
-    r0 = max(1e-4, A_R0 * np.exp(B_R0 * T_cell))
-    r1 = max(1e-4, np.polyval(coeffs_R1, T_cell))
-    c1 = max(1.0, np.polyval(coeffs_C1, T_cell))
-    r2 = max(1e-4, np.polyval(coeffs_R2, T_cell))
-    c2 = max(1.0, np.polyval(coeffs_C2, T_cell))
-
+    # --- RLS UPDATE ---
+    ocv_k = np.polyval(p_coeffs_ocv, x_k[2, 0])
+    y_rls = ocv_k - V_meas[k]
+    
+    if k > start_idx + 1:
+        phi_k = np.array([y_past[0], y_past[1], u_k, u_past[0], u_past[1]])
+        if abs(u_k) > 0.05 or abs(u_k - u_past[0]) > 0.05:
+            theta, P_rls = rls_step(y_rls, phi_k, theta, P_rls, lmbda)
+            
+    theta_history[k, :] = theta.flatten()
+    
+    # 1. Calcul des composants
+    # Conversion du vecteur theta en paramètres 2RC
+    r0, r1, c1, r2, c2 = theta_to_2rc(theta, Ts)
+    
+    # R0 est forcé par la loi d'Arrhenius liée à la température (Thermique)
+    r0 = max(1e-4, 7.0481e-02 * np.exp(-0.0187 * Ts))
+    
+    # Sécurité sur les paramètres RLS
+    r1 = max(r1, 1e-4)
+    c1 = max(c1, 1.0)
+    r2 = max(r2, 1e-4)
+    c2 = max(c2, 1.0)
+    
     # 2. Mise à jour des matrices d'état
     a1, a2 = np.exp(-Ts / (r1 * c1)), np.exp(-Ts / (r2 * c2))
     A_mat = np.array([[a1,0,0],[0,a2,0],[0,0,1]])
@@ -168,41 +225,57 @@ for k in range(N):
         P_zn += weight[i, 0].item() * (ecart_z ** 2)
         P_xz += weight[i, 0].item() * ecart_x * ecart_z
     
-    Kn = P_xz / P_zn
+    Kn = (P_xz / P_zn)
     x_k = x_pred + Kn * (V_meas[k] - y_pred)
     P_KF = P_pred - P_zn * (Kn @ Kn.T)
+
+    x_k[2, 0] = max(0, min(100, x_k[2, 0]))
     
     V_model[k] = y_pred
     soc_estimated[k] = max(0, min(100, x_k[2, 0]))
+    
+    # 5. Décalage temporel pour le RLS
+    y_past = np.array([y_rls, y_past[0]])
+    u_past = np.array([u_k, u_past[0]])
+
+    print(f"1. Température T_cell : {T_cell:.2f} °C")
+    print(f"2. Tension mesurée : {V_meas[k]:.4f} V | Tension UKF (y_pred) : {y_pred:.4f} V")
+    print(f"3. Matrice P_zn (Incertitude) : {P_zn:.6f}")
+    print(f"3b. Gain de Kalman (Kn) sur le SoC : {Kn[2, 0]:.6e}")
 
 print('Simulation Terminée !')
 
 # =============================================================================
 # --- 5. RÉSULTATS ET AFFICHAGE ---
 # =============================================================================
-valid_idx = time > 10 
-rmse_V = np.sqrt(np.mean((V_meas[valid_idx] - V_model[valid_idx])**2))
-rmse_soc = np.sqrt(np.mean((soc_true[valid_idx] - soc_estimated[valid_idx])**2))
+valid_idx = (time > 10) & (np.arange(N) >= start_idx)
 
-print(f"\n--- Validation du Modèle Thermo-Électrique ---")
+if np.any(valid_idx):
+    rmse_V = np.sqrt(np.mean((V_meas[valid_idx] - V_model[valid_idx])**2))
+    rmse_soc = np.sqrt(np.mean((soc_true[valid_idx] - soc_estimated[valid_idx])**2))
+else:
+    rmse_V = 0.0
+    rmse_soc = 0.0
+
+print(f"\n--- Validation du Modèle Thermo-Électrique + RLS ---")
 print(f"RMSE Tension : {rmse_V:.4f} V")
 print(f"RMSE SoC     : {rmse_soc:.2f} %")
 
 plt.figure(figsize=(10, 8))
 
 plt.subplot(2, 1, 1)
-plt.plot(time, V_meas, label='Tension Mesurée', color='black')
-plt.plot(time, V_model, label='Tension Prédite (Modèle Fixe)', color='red', linestyle='--')
-plt.title(f'Précision de la Tension (RMSE = {rmse_V:.4f} V)', fontweight='bold')
-plt.ylabel('Tension (V)')
+plt.plot(time, V_meas, label='Measured Voltage', color='black')
+plt.plot(time, np.where(np.arange(N) >= start_idx, V_model, np.nan), label=' Predicted Voltage', color='red', linestyle='--')
+plt.title(f'Voltage error (RMSE = {rmse_V:.4f} V)', fontweight='bold')
+plt.ylabel('Voltage (V)')
 plt.legend()
 plt.grid(True, linestyle=':', alpha=0.7)
 
 plt.subplot(2, 1, 2)
-plt.plot(time, soc_true, label='SoC Réel (Ampli Coulométrique)', color='black')
-plt.plot(time, soc_estimated, label='SoC Estimé (UKF)', color='blue', linestyle='--')
-plt.title(f'Suivi de l\'État de Charge (RMSE = {rmse_soc:.2f} %)', fontweight='bold')
-plt.xlabel('Temps (s)')
+plt.plot(time, np.where(np.arange(N) >= start_idx, soc_true, np.nan), label='Real SoC (Coulomb)', color='black')
+plt.plot(time, np.where(np.arange(N) >= start_idx, soc_estimated, np.nan), label='SoC Estimated (UKF)', color='blue', linestyle='--')
+plt.title(f'SoC error (RMSE = {rmse_soc:.2f} %)', fontweight='bold')
+plt.xlabel('Time (s)')
 plt.ylabel('SoC (%)')
 plt.legend()
 plt.grid(True, linestyle=':', alpha=0.7)

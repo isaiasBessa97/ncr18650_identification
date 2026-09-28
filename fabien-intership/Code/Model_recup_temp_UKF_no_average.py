@@ -127,25 +127,24 @@ Ts = 1.0
 initial_soc = 100
 
 # Fichiers de caractérisation OCV 
-file_charge = r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_CCCV005.0_02022026.txt"
-file_discharge = r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_CDch005.0_02022026.txt"
+file_charge = r"C:\Users\PRH\Downloads\CCCV_005C_025deg.csv"
+file_discharge = r"C:\Users\PRH\Downloads\CDch_005C_025deg.csv"
 
 # --- LISTE DES FICHIERS DE TEST SOUS DIFFÉRENTES TEMPÉRATURES ---
 
 test_files = [
-    r"C:\ncr18650_identification\dataset-thermal\BID003\BID003_RSDch_24022026.txt",
     r"C:\Users\PRH\Downloads\DST_065deg.csv",
     r"C:\Users\PRH\Downloads\DST_055deg.csv",
-    r"C:\Users\PRH\Downloads\MPDch_045deg.csv",
-    r"C:\Users\PRH\Downloads\MPDch_035deg.csv",
-    r"C:\Users\PRH\Downloads\MPDch_025deg.csv",
+    r"C:\Users\PRH\Downloads\DST_045deg.csv",
+    r"C:\Users\PRH\Downloads\DST_035deg.csv",
+    r"C:\Users\PRH\Downloads\DST_025deg.csv",
     r"C:\Users\PRH\Downloads\DST_060deg.csv",
     r"C:\Users\PRH\Downloads\DST_050deg.csv",
-    r"C:\Users\PRH\Downloads\MPDch_040deg.csv",
-    r"C:\Users\PRH\Downloads\MPDch_030deg.csv",
-    r"C:\Users\PRH\Downloads\MPDch_020deg.csv",
-    r"C:\Users\PRH\Downloads\MPDch_010deg.csv",
-    r"C:\Users\PRH\Downloads\MPDch_000deg.csv"
+    r"C:\Users\PRH\Downloads\DST_040deg.csv",
+    r"C:\Users\PRH\Downloads\DST_030deg.csv",
+    r"C:\Users\PRH\Downloads\DST_020deg.csv",
+    r"C:\Users\PRH\Downloads\DST_010deg.csv",
+    r"C:\Users\PRH\Downloads\DST_000deg.csv"
 ]
 
 # Chargement OCV
@@ -302,19 +301,19 @@ B_R0 = coeffs_R0[0]
 A_R0 = np.exp(coeffs_R0[1])
 
 # Modèles polynomiaux pour les autres composants
-coeffs_R1 = np.polyfit(all_Ts[mask_R1], all_R1[mask_R1], 2)
-coeffs_C1 = np.polyfit(all_Ts[mask_C1], all_C1[mask_C1], 2)
-coeffs_R2 = np.polyfit(all_Ts[mask_R2], all_R2[mask_R2], 2)
-coeffs_C2 = np.polyfit(all_Ts[mask_C2], all_C2[mask_C2], 2)
+coeffs_R1 = np.polyfit(all_Ts[mask_R1], all_R1[mask_R1], 5)
+coeffs_C1 = np.polyfit(all_Ts[mask_C1], all_C1[mask_C1], 5)
+coeffs_R2 = np.polyfit(all_Ts[mask_R2], all_R2[mask_R2], 5)
+coeffs_C2 = np.polyfit(all_Ts[mask_C2], all_C2[mask_C2], 5)
 
 print("\n" + "="*50)
 print("ÉQUATIONS DU MODÈLE THERMO-ÉLECTRIQUE ")
 print("="*50)
 print(f"R0(Ts) = {A_R0:.4e} * exp({B_R0:.4f} * Ts)")
-print(f"R1(Ts) = {coeffs_R1[0]:.6e}*Ts^2 + {coeffs_R1[1]:.6e}*Ts + {coeffs_R1[2]:.4e}")
-print(f"C1(Ts) = {coeffs_C1[0]:.4e}*Ts^2 + {coeffs_C1[1]:.4e}*Ts + {coeffs_C1[2]:.4e}")
-print(f"R2(Ts) = {coeffs_R2[0]:.6e}*Ts^2 + {coeffs_R2[1]:.6e}*Ts + {coeffs_R2[2]:.4e}")
-print(f"C2(Ts) = {coeffs_C2[0]:.4e}*Ts^2 + {coeffs_C2[1]:.4e}*Ts + {coeffs_C2[2]:.4e}")
+print(f"R1(Ts) = {coeffs_R1[0]:.6e}*Ts^5 + {coeffs_R1[1]:.6e}*Ts^4 + {coeffs_R1[2]:.4e}*Ts^3 + {coeffs_R1[3]:.4e}*Ts*2 + {coeffs_R1[4]:.4e}*Ts")
+print(f"C1(Ts) = {coeffs_C1[0]:.4e}*Ts^5 + {coeffs_C1[1]:.4e}*Ts^4 + {coeffs_C1[2]:.4e}*Ts^3 + {coeffs_C1[3]:.4e}*Ts*2 + {coeffs_C1[3]:.4e}*Ts")
+print(f"R2(Ts) = {coeffs_R2[0]:.6e}*Ts^5 + {coeffs_R2[1]:.6e}*Ts^4 + {coeffs_R2[2]:.4e}*Ts^3 + {coeffs_R2[3]:.4e}*Ts*2 + {coeffs_R2[3]:.4e}*Ts")
+print(f"C2(Ts) = {coeffs_C2[0]:.4e}*Ts^5 + {coeffs_C2[1]:.4e}*Ts^4 + {coeffs_C2[2]:.4e}*Ts^3 + {coeffs_C2[3]:.4e}*Ts*2 + {coeffs_C2[3]:.4e}*Ts")
 print("="*50)
 
 # =============================================================================

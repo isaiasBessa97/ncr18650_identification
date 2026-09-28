@@ -57,21 +57,31 @@ fprintf('Model RMSE : %.4f V (Erreur relative : %.4f %%)\n', rmse, rmse_pct);
 %% 5. Plotting the Comparison
 figure('Color', 'w'); hold on; grid on;
 
-% Plot the Original Pseudo-OCV (Solid thick blue line)
-plot(soc_axe, V_average, 'b', 'LineWidth', 2.5, 'DisplayName', 'Actual Pseudo-OCV (Data)');
+% Plot the Original Pseudo-OCV (Solid blue line)
+plot(soc_axe, V_average, 'b', 'LineWidth', 2, 'DisplayName', 'Actual Pseudo-OCV (Data)');
 
-% Plot the Fitted Polynomial Model (Dashed yellow/red line)
+% Plot the Fitted Polynomial Model (Dashed red line)
 plot(soc_axe, V_model, '--r', 'LineWidth', 2, 'DisplayName', sprintf('Polynomial Model (Degree %d)', poly_degree));
 
-% Formatting
-xlabel('State of Charge (SoC) [%]', 'FontWeight', 'bold');
-ylabel('Open Circuit Voltage (OCV) [V]', 'FontWeight', 'bold');
+% Configuration des axes pour ressembler au rendu LaTeX
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16);
 
-% On ajoute le pourcentage au titre du graphique !
-title_str = sprintf('Pseudo-OCV vs Model (Degree %d | RMSE = %.4f V [%.4f %%])', poly_degree, rmse, rmse_pct);
-title(title_str, 'FontSize', 14);
-legend('Location', 'best');
+% Labels avec l'interprète LaTeX
+xlabel('State of Charge (\%)', 'interpreter', 'latex');
+ylabel('Open Circuit Voltage (V)', 'interpreter', 'latex');
 
+% Création du titre. 
+% Note : on utilise \\%% dans le sprintf pour que MATLAB passe bien le caractère \% à LaTeX
+title_str = sprintf('Pseudo-OCV vs Model (Degree %d | RMSE = %.4f V [%.4f \\%%])', poly_degree, rmse, rmse_pct);
+title(title_str, 'interpreter', 'latex');
+
+% Légende
+legend('Location', 'southeast', 'interpreter', 'latex');
+
+% Limites de l'axe X (0 à 100%)
+xlim([0 100]);
+
+hold off;
 hold off;
 %% 6. Display Coefficients for External Use
 fprintf('\n====================================================\n');
