@@ -1,6 +1,6 @@
 clear all, close all, clc
 %% load
-dataMeas = readtable("NCM_1_CHG_20261104_151751.csv");
+dataMeas = readtable("BID004_NCM_1_MPDCH_20261107_135608.csv");
 
 volt = dataMeas.V;
 curr = dataMeas.I;
